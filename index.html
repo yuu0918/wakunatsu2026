@@ -15,18 +15,44 @@
 <main class="app"><div class="leaf l1">🌿</div><div class="leaf l2">🍃</div><div class="leaf l3">🌱</div><section id="screen" class="screen"></section></main>
 <div id="scannerModal" class="modal"><div class="scanner"><div class="pill">📷 ミッションQR</div><h2>QRコードを読み取ろう</h2><div class="scan-note">ミッションに成功したら、スタッフが案内するQRコードをカメラに写してね。</div><div id="reader"></div><button class="danger" onclick="closeScanner()">カメラを閉じる</button></div></div>
 <script>
-const missions=[
-{id:"jungle",name:"ジャングルへ",emoji:"🌴",qr:"JUNGLE",before:"受付でスタート！悪さをしているジャングルのボスを倒しに行こう！",success:"ジャングルへようこそ！悪いボスを倒しに行こう！…ああっ！目の前に大きな丸太が！",next:"缶倒しブースへ移動しよう！",scene:"forest"},
-{id:"log",name:"丸太をどけろ",emoji:"🪵",qr:"LOG",before:"丸太が道をふさいでいる！缶を倒して道を開けよう！",success:"大成功！丸太をどかして先へ進めるぞ。…ああっ！『太陽のしずく』が川の底へ！",next:"ヨーヨー釣りブースへ移動しよう！",scene:"log"},
-{id:"sun",name:"太陽のしずく",emoji:"☀️",qr:"SUN_DROP",before:"川に落ちた『太陽のしずく』を、沈む前に救い上げよう！",success:"すごい！太陽のしずくをゲットしたぞ！このエネルギーを溜めて、いざボスバトルだ！",next:"大画面モニターのボタン連打へ！",scene:"sun"},
-{id:"boss",name:"ボスバトル",emoji:"👹",qr:"BOSS",before:"最後の戦い！ボタンを連打してボスを倒そう！",success:"やったー！ボスを倒したぞ！おめでとう！ご褒美をもらいに行こう！",next:"お菓子・お絵描きブース、写真撮影へ！",scene:"boss"}
+const missions = [
+  {
+    id: "log",
+    name: "丸太をどけろ",
+    emoji: "🪵",
+    qr: "LOG",
+    before: "目の前に大きな丸太が！缶を倒して道を開けよう！",
+    success: "大成功！丸太をどかして先へ進めるぞ。…ああっ！『太陽のしずく』が川の底へ！",
+    next: "ヨーヨー釣りブースへ移動しよう！",
+    scene: "log"
+  },
+  {
+    id: "sun",
+    name: "太陽のしずく",
+    emoji: "☀️",
+    qr: "SUN_DROP",
+    before: "川に落ちた『太陽のしずく』を、沈む前に救い上げよう！",
+    success: "すごい！太陽のしずくをゲットしたぞ！このエネルギーを溜めて、いざボスバトルだ！",
+    next: "大画面モニターのボタン連打へ！",
+    scene: "sun"
+  },
+  {
+    id: "boss",
+    name: "ボスバトル",
+    emoji: "👹",
+    qr: "BOSS",
+    before: "最後の戦い！ボタンを連打してボスを倒そう！",
+    success: "やったー！ボスを倒したぞ！おめでとう！ご褒美をもらいに行こう！",
+    next: "お菓子・お絵描きブース、写真撮影へ！",
+    scene: "boss"
+  }
 ];
 let completed=JSON.parse(localStorage.getItem("wakuwaku_full_completed")||"[]"),playerName=localStorage.getItem("wakuwaku_full_name")||"",qrScanner=null,scanning=false,staffMode=false,staffTapCount=0,staffTapTimer=null;
 const screen=document.getElementById("screen"),scannerModal=document.getElementById("scannerModal");
 function save(){localStorage.setItem("wakuwaku_full_completed",JSON.stringify(completed));localStorage.setItem("wakuwaku_full_name",playerName)}
 function esc(t){return String(t).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function renderStart(){screen.innerHTML=`<div class="hero"><div class="pill">🌿 わくなつスペシャル 🌿</div><h1 onclick="secretStaffTap()">ワクワクIT探検隊<br><span style="font-size:.58em">～ジャングルのボスを倒せ！～</span></h1><div class="hero-icon">📱🌴🧭</div><div class="glass"><p><strong>スマホとリアルな遊びがつながるジャングル冒険ゲーム！</strong></p><div class="rules"><div class="rule"><span>1</span><div>各ブースのミッションに挑戦</div></div><div class="rule"><span>2</span><div>成功したらQRコードを読み取る</div></div><div class="rule"><span>3</span><div>ストーリーを進めてボスを倒す</div></div></div></div><button class="primary" onclick="renderOpening()">探検スタート！</button><button class="ghost" onclick="resetGame()">最初からやり直す</button></div>`}
-function renderOpening(){screen.innerHTML=`<div class="story"><div class="pill">🎬 オープニング</div><h2>ジャングルの奥へ進もう</h2><div class="scene"><div class="forest-left"></div><div class="forest-right"></div><div class="path"></div><div class="scene-text">ザサザサ…木々をかき分けて、ジャングルの奥へ！</div></div><div class="glass"><p><strong>ジャングルへようこそ！</strong></p><p>悪いボスを倒しに行こう！</p><p style="margin-top:10px">…ああっ！目の前に大きな丸太が！</p></div><button class="primary" onclick="completeOpening()">ジャングルに入る</button></div>`}
+function renderStart(){screen.innerHTML=`<div class="hero"><div class="pill">🌿 わくなつスペシャル 🌿</div><h1 onclick="secretStaffTap()">ワクワクIT探検隊<br><span style="font-size:.5<button class="primary" onclick="renderMissionHub()">缶倒しブースへGO！</button>～ジャングルのボスを倒せ！～</span></h1><div class="hero-icon">📱🌴🧭</div><div class="glass"><p><strong>スマホとリアルな遊びがつながるジャングル冒険ゲーム！</strong></p><div class="rules"><div class="rule"><span>1</span><div>各ブースのミッションに挑戦</div></div><div class="rule"><span>2</span><div>成功したらQRコードを読み取る</div></div><div class="rule"><span>3</span><div>ストーリーを進めてボスを倒す</div></div></div></div><button class="primary" onclick="renderOpening()">探検スタート！</button><button class="ghost" onclick="resetGame()">最初からやり直す</button></div>`}
+function renderOpening(){screen.innerHTML=`<div class="story"><div class="pill">🎬 オープニング</div><h2>ジャングルの奥へ進もう</h2><div class="scene"><div class="forest-left"></div><div class="forest-right"></div><div class="path"></div><div class="scene-text">ザサザサ…木々をかき分けて、ジャングルの奥へ！</div></div><div class="glass"><p><strong>ジャングルへようこそ！</strong></p><p>悪いボスを倒しに行こう！</p><p style="margin-top:10px">…ああっ！目の前に大きな丸太が！</p></div>on></div>`}
 function completeOpening(){if(!completed.includes("jungle")){completed.push("jungle");save()}renderSuccess(missions[0])}
 function renderMissionHub(){const remaining=missions.length-completed.length,complete=remaining===0;screen.innerHTML=`<div class="topline"><div style="font-weight:900;color:#166534">🌴 ジャングル探検中</div><div class="counter">${completed.length}/${missions.length} クリア</div></div><h2>ミッションマップ</h2><div class="mission-grid">${missions.map((m,i)=>{const d=completed.includes(m.id),c=i===completed.length;return `<div class="mission-card ${m.id==='boss'?'boss-card':m.id} ${d?'done':''}"><div><div class="mission-icon">${m.emoji}</div><div class="mission-name">${m.name}</div><div class="mission-sub">${d?'クリア！':c?'次のミッション':'まだ進めない'}</div></div></div>`}).join('')}</div>${complete?`<div class="next-box">🎉 すべてのミッションをクリア！</div><button class="primary" onclick="renderCertificateForm()">認定証を作る</button>`:`<div class="glass"><p><strong>${missions[completed.length].before}</strong></p></div><button class="primary" onclick="openScanner()">📷 成功したらQRを読み取る</button>`}<div class="staff-panel ${staffMode?'show':''}"><h3 style="margin:0 0 10px;text-align:center;color:#c2410c">スタッフ管理</h3><div class="staff-grid">${missions.map(m=>{const d=completed.includes(m.id);return `<button class="${d?'done':''}" onclick="staffToggle('${m.id}')">${m.emoji} ${m.name}<br>${d?'登録済み':'登録する'}</button>`}).join('')}</div><p style="font-size:12px;text-align:center;color:#9a3412;font-weight:800;margin-top:10px">QRが反応しない場合だけ、順番に登録してください。</p><button class="ghost" onclick="staffMode=false;renderMissionHub()">スタッフ管理を閉じる</button></div><button class="ghost" onclick="renderStart()">トップに戻る</button><div class="footer">タイトルを5回連続タップするとスタッフ管理を開けます</div>`}
 function sceneHtml(s){if(s==='log')return `<div class="scene"><div class="path"></div><div class="log-pile">🪵🪵🪵</div><div class="scene-text">ガラガラガッシャーン！丸太が崩れて道が開いた！</div></div>`;if(s==='sun')return `<div class="scene"><div class="river"></div><div class="sun-drop">☀️</div><div class="scene-text">ザバーン！太陽のしずくを救い上げた！</div></div>`;if(s==='boss')return `<div class="scene"><div class="boss">👹</div><div class="energy"></div><div class="scene-text">元気玉がボスに直撃！ボスは降参した！</div></div>`;return `<div class="scene"><div class="forest-left"></div><div class="forest-right"></div><div class="path"></div><div class="scene-text">ジャングルの奥へ進もう！</div></div>`}
