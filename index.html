@@ -1122,7 +1122,7 @@
         <div class="scene">
           <div class="boss">👹</div>
           <div class="energy"></div>
-          <div class="scene-text">元気玉がボスに直撃！ボスは降参した！</div>
+          <div class="scene-text"><ruby>元気玉<rt>げんきだま</rt></ruby>がボスに<ruby>直撃<rt>ちょくげき</rt></ruby>！ボスは<ruby>降参<rt>こうさん</rt></ruby>した！</div>
         </div>
       `;
     }
@@ -1142,7 +1142,7 @@
           <div class="next-box">${mission.next}</div>
 
           <button class="primary" type="button" onclick="renderMissionHub()">
-            ${mission.id === "boss" ? "認定証へ進む" : "次のミッションへ"}
+            ${mission.id === "boss" ? "<ruby>認定証<rt>にんていしょう</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>む" : "<ruby>次<rt>つぎ</rt></ruby>のミッションへ"}
           </button>
         </div>
       `);
@@ -1153,7 +1153,7 @@
       scannerModal.setAttribute("aria-hidden", "false");
 
       if (!window.Html5Qrcode) {
-        alert("QR読み取りの準備ができませんでした。ネット接続を確認してください。");
+        alert("QR<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>りの<ruby>準備<rt>じゅんび</rt></ruby>ができませんでした。ネット<ruby>接続<rt>せつぞく</rt></ruby>を<ruby>確認<rt>かくにん</rt></ruby>してください。");
         closeScanner();
         return;
       }
@@ -1176,7 +1176,7 @@
           const mission = findMission(decodedText);
 
           if (!mission) {
-            alert("このQRコードは今回のミッション用ではありません。");
+            alert("このQRコードは<ruby>今回<rt>こんかい</rt></ruby>のミッション<ruby>用<rt>よう</rt></ruby>ではありません。");
             return;
           }
 
@@ -1184,7 +1184,7 @@
         },
         () => {}
       ).catch(() => {
-        alert("カメラを起動できませんでした。GitHub PagesなどのHTTPSのURLで開き、カメラ許可をオンにしてください。");
+        alert("カメラを<ruby>起動<rt>きどう</rt></ruby>できませんでした。GitHub PagesなどのHTTPSのURLで<ruby>開<rt>ひら</rt></ruby>き、カメラ<ruby>許可<rt>きょか</rt></ruby>をオンにしてください。");
         closeScanner();
       });
     }
@@ -1231,7 +1231,7 @@
       }
 
       if (!expected || expected.id !== mission.id) {
-        alert(`順番が違います。次は「${expected ? expected.name : "完了"}」です。`);
+        alert(`<ruby>順番<rt>じゅんばん</rt></ruby>が<ruby>違<rt>ちが</rt></ruby>います。<ruby>次<rt>つぎ</rt></ruby>は「${expected ? expected.name : "<ruby>完了<rt>かんりょう</rt></ruby>"}」です。`);
         return;
       }
 
@@ -1326,7 +1326,7 @@
                   onclick="staffToggleMission('${mission.id}')"
                 >
                   ${mission.emoji} ${mission.name}<br>
-                  ${done ? "登録済み・タップでここから戻す" : isNext ? "次に登録できる" : "まだ登録できない"}
+                  ${done ? "<ruby>登録済<rt>とうろくず</rt></ruby>み・タップでここから<ruby>戻<rt>もど</rt></ruby>す" : isNext ? "<ruby>次<rt>つぎ</rt></ruby>に<ruby>登録<rt>とうろく</rt></ruby>できる" : "まだ<ruby>登録<rt>とうろく</rt></ruby>できない"}
                 </button>
               `;
             }).join("")}
@@ -1334,11 +1334,12 @@
         </div>
 
         <button class="primary" type="button" onclick="renderMissionHub()">
-          ゲーム画面へ戻る
+          ゲーム<ruby>画面<rt>がめん</rt></ruby>
+          へ<ruby>戻<rt>もど</rt></ruby>る
         </button>
 
         <button class="ghost" type="button" onclick="renderStart()">
-          トップへ戻る
+          トップへ<ruby>戻<rt>もど</rt></ruby>る
         </button>
       `);
     }
@@ -1365,7 +1366,7 @@
       const expected = missions[completed.length];
 
       if (!expected || expected.id !== id) {
-        alert(`順番に登録してください。次は「${expected ? expected.name : "完了"}」です。`);
+        alert(`<ruby>順番<rt>じゅんばん</rt></ruby>に<ruby>登録<rt>とうろく</rt></ruby>してください。<ruby>次<rt>つぎ</rt></ruby>は「${expected ? expected.name : "<ruby>完了<rt>かんりょう</rt></ruby>"}」です。`);
         return;
       }
 
@@ -1376,18 +1377,20 @@
 
     function renderCertificateForm() {
       setScreen(`
-        <div class="pill">🏆 認定証づくり</div>
+        <div class="pill">🏆 <ruby>認定証<rt>にんていしょう</rt></ruby>づくり</div>
 
         <h1>
-          探検隊の名前を
+          <ruby>探検隊<rt>たんけんたい</rt></ruby>の<ruby>
+    名前<rt>なまえ</rt></ruby>
+       を
           <br>
-          入れよう
+          <ruby>入<rt>い</rt></ruby>れよう
         </h1>
 
         <div class="hero-icon" style="text-align:center">✍️</div>
 
         <div class="glass">
-          <p>名前を入力すると、きみだけの認定証が完成するよ。</p>
+          <p><ruby>名前<rt>なまえ</rt></ruby>を<ruby>入力<rt>にゅうりょく</rt></ruby>すると、きみだけの<ruby>認定証<rt>にんていしょう</rt></ruby>が<ruby>完成<rt>かんせい</rt></ruby>するよ。</p>
         </div>
 
         <input
@@ -1399,11 +1402,11 @@
         >
 
         <button class="primary" type="button" onclick="createCertificate()">
-          認定証を表示
+          <ruby>認定証<rt>にんていしょう</rt></ruby>を<ruby>表示<rt>ひょうじ</rt></ruby>
         </button>
 
         <button class="ghost" type="button" onclick="renderMissionHub()">
-          戻る
+          <ruby>戻<rt>もど</rt></ruby>る
         </button>
       `);
     }
@@ -1411,47 +1414,47 @@
     function createCertificate() {
       const input = document.getElementById("nameInput");
 
-      playerName = input.value.trim() || "探検隊";
+      playerName = input.value.trim() || "<ruby>探検隊<rt>たんけんたい</rt></ruby>";
       save();
       renderCertificate();
     }
 
     function renderCertificate() {
       setScreen(`
-        <div class="pill">🌿 ワクワクIT探検隊</div>
-        <h1>探検認定証</h1>
+        <div class="pill">🌿 ワクワクIT<ruby>探検隊<rt>たんけんたい</rt></ruby></div>
+        <h1><ruby>探検認定証<rt>たんけんにんていしょう</rt></ruby></h1>
 
         <div class="certificate">
           <div class="cert-label">MISSION COMPLETE</div>
-          <div class="cert-title">ジャングル探検認定証</div>
+          <div class="cert-title">ジャングル<ruby>探検認定証<rt>たんけんにんていしょう</rt></ruby></div>
 
           <p style="position:relative;z-index:1">
             あなたは3つのミッションをクリアし、
             <br>
-            ジャングルのボスを倒しました。
+            ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>しました。
           </p>
 
           <div class="cert-name">${escapeHtml(playerName)}</div>
 
           <p style="position:relative;z-index:1">
-            すばらしい勇気とチャレンジする力を
+            すばらしい<ruby>勇気<rt>ゆうき</rt></ruby>とチャレンジする力を
             <br>
-            ここに認定します。
+            ここに<ruby>認定<rt>にんてい</rt></ruby>します。
           </p>
 
           <p style="position:relative;z-index:1;font-size:36px;margin-top:12px">
             🪵 ☀️ 👹
           </p>
 
-          <div class="stamp">認定</div>
+          <div class="stamp"><ruby>認定<rt>にんてい/<rt></ruby></div>
         </div>
 
         <button class="primary" type="button" onclick="renderClear()">
-          クリア画面へ
+          クリア<ruby>画面<rt>がめん</rt></ruby>へ
         </button>
 
         <button class="secondary" type="button" onclick="renderCertificateForm()">
-          名前を変更
+          <ruby>名前<rt>なまえ</rt></ruby>を<ruby>変更<rt>へんこう</rt></ruby>
         </button>
       `);
     }
@@ -1473,13 +1476,13 @@
         </div>
 
         <div class="hero">
-          <div class="pill">🎉 ミッション完了 🎉</div>
+          <div class="pill">🎉 ミッション<ruby>完了<rt>かんりょう</rt></ruby> 🎉</div>
           <h1>ゲーム<br>クリア！</h1>
           <div class="hero-icon">🏆</div>
 
           <div class="glass">
             <h2>${escapeHtml(playerName)}</h2>
-            <p>ジャングルのボスを倒したぞ！</p>
+            <p>ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>したぞ！</p>
 
             <p style="margin-top:10px">
               <strong>
