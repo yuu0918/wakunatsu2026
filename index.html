@@ -1414,7 +1414,7 @@
     function createCertificate() {
       const input = document.getElementById("nameInput");
 
-      playerName = input.value.trim() || "<ruby>探検隊<rt>たんけんたい</rt></ruby>";
+      playerName = input.value.trim() || "探検隊";
       save();
       renderCertificate();
     }
@@ -1434,7 +1434,11 @@
             ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>しました。
           </p>
 
-          <div class="cert-name">${escapeHtml(playerName)}</div>
+          <div class="cert-name">
+            　${
+            　　playerName==="探検隊"
+          　　　　?"<ruby>探検隊<rt>たんけんたい</rt></ruby>"
+                 :escapeHtml(playerName)}</div>
 
           <p style="position:relative;z-index:1">
             すばらしい<ruby>勇気<rt>ゆうき</rt></ruby>とチャレンジする力を
