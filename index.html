@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#14532d">
-  <title>ワクワクIT<ruby>探検隊<rt>たんけんたい</rt></ruby></title>
+  <title>ワクワクITたんけんたい</title>
 
   <!-- QR読み取り。カメラはGitHub PagesなどのHTTPS上で使用してください。 -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -970,10 +970,10 @@
 
       setScreen(`
         <div class="hero">
-          <div class="pill">🌿 わくなつ2026 🌿</div>
+          <div class="pill">🌿 わくなつスペシャル 🌿</div>
 
           <h1>
-            ワクワクIT<ruby>探検隊<rt>たんけんたい</rt></ruby>
+            ワクワクITたんけんたい
             <br>
             <span style="font-size:.58em">～ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>せ！～</span>
           </h1>
@@ -1037,20 +1037,19 @@
 
     function renderMissionHub() {
       const complete = completed.length === missions.length;
-      const nextMission = missions[completed.length] || null;
+      const remainingMissions = missions.filter(mission => !completed.includes(mission.id));
 
       setScreen(`
         <div class="topline">
-          <div class="topline-title">🌴 ジャングル<ruby>探検中<rt>たんけんたい</rt></ruby></div>
+          <div class="topline-title">🌴 ジャングル<ruby>探検中<rt>たんけんちゅう</rt></ruby></div>
           <div class="counter">${completed.length}/${missions.length} クリア</div>
         </div>
 
         <h2>ミッションマップ</h2>
 
         <div class="mission-grid">
-          ${missions.map((mission, index) => {
+          ${missions.map(mission => {
             const done = completed.includes(mission.id);
-            const current = index === completed.length;
 
             return `
               <div class="mission-card ${mission.id === "boss" ? "boss-card" : mission.id} ${done ? "done" : ""}">
@@ -1058,7 +1057,7 @@
                   <div class="mission-icon">${mission.emoji}</div>
                   <div class="mission-name">${mission.name}</div>
                   <div class="mission-sub">
-                    ${done ? "クリア！" : current ? "<ruby>次<rt>つぎ</rt></ruby>のミッション" : "まだ<ruby>進<rt>すす</rt></ruby>めない"}
+                    ${done ? "クリア！" : "<ruby>好<rt>す</rt></ruby>きな<ruby>順番<rt>じゅんばん</rt></ruby>で<ruby>挑戦<rt>ちょうせん</rt></ruby>できる"}
                   </div>
                 </div>
               </div>
@@ -1075,21 +1074,33 @@
               </div>
 
               <button class="primary" type="button" onclick="renderCertificateForm()">
-                <ruby>認定証<rt>にんｔりしょう</rt></ruby>を<ruby>作<rt>つく</rt></ruby>る
+                <ruby>認定証<rt>にんていしょう</rt></ruby>を<ruby>作<rt>つく</rt></ruby>る
               </button>
             `
             : `
               <div class="glass">
-                <p><strong>${nextMission.before}</strong></p>
+                <p><strong>
+                  まだクリアしていないミッションなら、どのQRコードからでも<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>れるよ！
+                </strong></p>
+
+                <div style="margin-top:12px;text-align:left;">
+                  ${remainingMissions.map(mission => `
+                    <p style="margin-top:8px;">
+                      ${mission.emoji} ${mission.name}：${mission.before}
+                    </p>
+                  `).join("")}
+                </div>
               </div>
 
               <button class="primary" type="button" onclick="openScanner()">
-                📷 <ruby>成功<rt>せいこう</rt></ruby>したらQRを<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>る
+                📷 QRコードを<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>る
               </button>
             `
         }
 
-        <button class="ghost" type="button" onclick="renderStart()">トップに<ruby>戻<rt>もど</rt></ruby>る</button>
+        <button class="ghost" type="button" onclick="renderStart()">
+          トップに<ruby>戻<rt>もど</rt></ruby>る
+        </button>
 
         <div class="footer">
           右下の「管理」はスタッフ用です
@@ -1223,15 +1234,8 @@
     }
 
     function processScannedMission(mission) {
-      const expected = missions[completed.length];
-
       if (completed.includes(mission.id)) {
         alert("このミッションはすでにクリアしています。");
-        return;
-      }
-
-      if (!expected || expected.id !== mission.id) {
-        alert(`<ruby>順番<rt>じゅんばん</rt></ruby>が<ruby>違<rt>ちが</rt></ruby>います。<ruby>次<rt>つぎ</rt></ruby>は「${expected ? expected.name : "<ruby>完了<rt>かんりょう</rt></ruby>"}」です。`);
         return;
       }
 
@@ -1303,21 +1307,18 @@
     }
 
     function renderStaffPanel() {
-      const nextMission = missions[completed.length] || null;
-
       setScreen(`
         <div class="pill">🔧 スタッフ管理</div>
-        <h1 style="font-size:32px">ミッション手動登録</h1>
+        <h1 style="font-size:32px">ミッション<ruby>手動登録<rt>しゅどうとうろく</rt></ruby></h1>
 
         <div class="staff-panel">
           <p style="text-align:center;font-weight:800">
-            QRコードが反応しなかった場合だけ使用してください。
+            QRコードが<ruby>反応<rt>はんのう</rt></ruby>しなかった<ruby>場合<rt>ばあい</rt></ruby>だけ<ruby>使用<rt>しよう</rt></ruby>してください。
           </p>
 
           <div class="staff-grid">
             ${missions.map(mission => {
               const done = completed.includes(mission.id);
-              const isNext = nextMission && nextMission.id === mission.id;
 
               return `
                 <button
@@ -1326,7 +1327,10 @@
                   onclick="staffToggleMission('${mission.id}')"
                 >
                   ${mission.emoji} ${mission.name}<br>
-                  ${done ? "<ruby>登録済<rt>とうろくず</rt></ruby>み・タップでここから<ruby>戻<rt>もど</rt></ruby>す" : isNext ? "<ruby>次<rt>つぎ</rt></ruby>に<ruby>登録<rt>とうろく</rt></ruby>できる" : "まだ<ruby>登録<rt>とうろく</rt></ruby>できない"}
+                  ${done
+                    ? "<ruby>登録済<rt>とうろくず</rt></ruby>み・タップで<ruby>取消<rt>とりけ</rt></ruby>し"
+                    : "タップして<ruby>登録<rt>とうろく</rt></ruby>"
+                  }
                 </button>
               `;
             }).join("")}
@@ -1334,8 +1338,7 @@
         </div>
 
         <button class="primary" type="button" onclick="renderMissionHub()">
-          ゲーム<ruby>画面<rt>がめん</rt></ruby>
-          へ<ruby>戻<rt>もど</rt></ruby>る
+          ゲーム<ruby>画面<rt>がめん</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る
         </button>
 
         <button class="ghost" type="button" onclick="renderStart()">
@@ -1352,25 +1355,11 @@
       }
 
       if (completed.includes(id)) {
-        const index = missions.findIndex(item => item.id === id);
-
-        completed = completed.filter(doneId => {
-          return missions.findIndex(item => item.id === doneId) < index;
-        });
-
-        save();
-        renderStaffPanel();
-        return;
+        completed = completed.filter(doneId => doneId !== id);
+      } else {
+        completed.push(id);
       }
 
-      const expected = missions[completed.length];
-
-      if (!expected || expected.id !== id) {
-        alert(`<ruby>順番<rt>じゅんばん</rt></ruby>に<ruby>登録<rt>とうろく</rt></ruby>してください。<ruby>次<rt>つぎ</rt></ruby>は「${expected ? expected.name : "<ruby>完了<rt>かんりょう</rt></ruby>"}」です。`);
-        return;
-      }
-
-      completed.push(id);
       save();
       renderStaffPanel();
     }
@@ -1414,7 +1403,7 @@
     function createCertificate() {
       const input = document.getElementById("nameInput");
 
-      playerName = input.value.trim() || "探検隊";
+      playerName = input.value.trim() || "<ruby>探検隊<rt>たんけんたい</rt></ruby>";
       save();
       renderCertificate();
     }
@@ -1434,11 +1423,7 @@
             ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>しました。
           </p>
 
-          <div class="cert-name">
-            　${
-            　　playerName==="探検隊"
-          　　　　?"<ruby>探検隊<rt>たんけんたい</rt></ruby>"
-                 :escapeHtml(playerName)}</div>
+          <div class="cert-name">${escapeHtml(playerName)}</div>
 
           <p style="position:relative;z-index:1">
             すばらしい<ruby>勇気<rt>ゆうき</rt></ruby>とチャレンジする力を
