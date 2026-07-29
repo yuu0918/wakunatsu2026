@@ -811,48 +811,7 @@
       }
     }
 
-    /* スタート画面で右側からのぞく火のボス */
-    .hero {
-      position: relative;
-      overflow: hidden;
-      isolation: isolate;
-    }
 
-    .peek-boss {
-      position: absolute;
-      top: 70px;
-      right: -135px;
-      width: 390px;
-      max-width: none;
-      height: auto;
-      z-index: 1;
-      pointer-events: none;
-      user-select: none;
-      filter: drop-shadow(0 10px 12px rgba(88, 28, 0, .28));
-      animation: peekBoss 4s ease-in-out infinite;
-    }
-
-    .hero > *:not(.peek-boss) {
-      position: relative;
-      z-index: 2;
-    }
-
-    @keyframes peekBoss {
-      0%, 100% {
-        transform: translateX(20px);
-      }
-      50% {
-        transform: translateX(-12px);
-      }
-    }
-
-    @media (max-width: 380px) {
-      .peek-boss {
-        top: 82px;
-        right: -188px;
-        width: 350px;
-      }
-    }
 
   </style>
 </head>
@@ -1031,7 +990,6 @@
 
   setScreen(`
     <div class="hero">
-      <img src="./fire-bosu-transparent.png" class="peek-boss" alt="" aria-hidden="true">
       <div class="pill">🌟 ワクワク！IT<ruby>探検隊<rt>たんけんたい</rt></ruby> 🌟</div>
 
       <h1>
@@ -1260,7 +1218,7 @@
           <div class="next-box">${mission.next}</div>
 
           <button class="primary" type="button" onclick="renderMissionHub()">
-            "ミッションマップへ<ruby>戻<rt>もど</rt></ruby>る"
+            ミッションマップへ<ruby>戻<rt>もど</rt></ruby>る
           </button>
         </div>
       `);
