@@ -887,38 +887,47 @@
     const STORAGE_NAME = "wakuwaku_final_name_v1";
     const STAFF_PASSWORD = "2026";
 
-    const missions = [
-      {
-        id: "log",
-        name: "<ruby>丸太<rt>まるた</rt></ruby>をどけろ",
-        emoji: "🪵",
-        qr: "LOG",
-        before: "<ruby>目<rt>め</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>に<ruby>大<rt>おお</rt></ruby>きな<ruby>丸太<rt>まるた</rt></ruby>が！<ruby>木<rt>き</rt></ruby>をたおして、ふさがれた<ruby>道<rt>みち</rt></ruby>をあけよう！",
-        success: "<ruby>大成功<rt>だいせいこう</rt></ruby>！<ruby>丸太<rt>まるた</rt></ruby>をどかして<ruby>先<rt>さき</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>めるぞ。…ああっ！『<ruby>太陽<rt>たいよう</rt></ruby>のしずく』が<ruby>川<rt>かわ</rt></ruby>の<ruby>底<rt>そこ</rt></ruby>へ！",
-        next: "ヨーヨー<ruby>釣<rt>つ</rt></ruby>りブースへ<ruby>移動<rt>いどう</rt></ruby>しよう！",
-        scene: "log"
-      },
-      {
-        id: "sun",
-        name: "<ruby>太陽<rt>たいよう</rt></ruby>のしずく",
-        emoji: "☀️",
-        qr: "SUN_DROP",
-        before: "ボスの<ruby>部屋<rt>へや</rt></ruby>へ<ruby>続<rt>つづ</rt></ruby>くゲートを<ruby>開<rt>ひら</rt></ruby>く『<ruby>太陽<rt>たいよう</rt></ruby>のしずく』が<ruby>川<rt>かわ</rt></ruby>へ<ruby>落<rt>お</rt></ruby>ちた！<ruby>沈<rt>しず</rt></ruby>む<ruby>前<rt>まえ</rt></ruby>に<ruby>救<rt>すく</rt></ruby>い<ruby>上<rt>あ</rt></ruby>げよう！",
-        success: "すごい！<ruby>太陽<rt>たいよう</rt></ruby>のしずくをゲットしたぞ！このエネルギーを<ruby>溜<rt>た</rt></ruby>めて、いざボスバトルだ！",
-        next: "<ruby>大画面<rt>だいがめん</rt></ruby>モニターのボタン<ruby>連打<rt>れんだ</rt></ruby>へ<ruby>移動<rt>いどう</rt></ruby>しよう！",
-        scene: "sun"
-      },
-      {
-        id: "boss",
-        name: "ボスバトル",
-        emoji: "👹",
-        qr: "BOSS",
-        before: "<ruby>最後<rt>さいご</rt></rube>の<ruby>戦<rt>たたか</rt></ruby>い！ボタンを<ruby>連打<rt>れんだ</rt></ruby>してエネルギーを<ruby>溜<rt>た</rt></ruby>め、ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>そう！",
-        success: "やったー！ボスを<ruby>倒<rt>たお</rt></ruby>したぞ！おめでとう！ご<ruby>褒美<rt>ほうび</rt></ruby>をもらいに<ruby>行<rt>い</rt></ruby>こう！",
-        next: "お<ruby>菓子<rt> かし</rt></ruby>・お<ruby>絵描<rt>えか</rt></ruby>きブースへ<rubyb>行<rt>い</rt></ruby>って、<ruby>最後<rt>さいご</rt></ruby>に<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ろう！",
-        scene: "boss"
-      }
-    ];
+   const missions = [
+  {
+    id: "wind",
+    name: "<ruby>風<rt>かぜ</rt></ruby>の<ruby>冒険<rt>ぼうけん</rt></ruby>",
+    emoji: "🌪️",
+    qr: "WIND",
+    before:
+      "<ruby>輪投<rt>わな</rt></ruby>げの<ruby>試練<rt>しれん</rt></ruby>に<ruby>挑戦<rt>ちょうせん</rt></ruby>しよう！",
+    success:
+      "<ruby>風<rt>かぜ</rt></ruby>の<ruby>冒険<rt>ぼうけん</rt></ruby>クリア！<ruby>輪投<rt>わな</rt></ruby>げの<ruby>試練<rt>しれん</rt></ruby>を<ruby>乗<rt>の</rt></ruby>り<ruby>越<rt>こ</rt></ruby>えたぞ！",
+    next:
+      "<ruby>風<rt>かぜ</rt></ruby>のスタンプをゲット！ほかの<ruby>冒険<rt>ぼうけん</rt></ruby>にも<ruby>挑戦<rt>ちょうせん</rt></ruby>しよう！",
+    scene: "wind"
+  },
+  {
+    id: "water",
+    name: "<ruby>水<rt>みず</rt></ruby>の<ruby>冒険<rt>ぼうけん</rt></ruby>",
+    emoji: "💧",
+    qr: "WATER",
+    before:
+      "<ruby>水<rt>みず</rt></ruby>の<ruby>試練<rt>しれん</rt></ruby>！ヨーヨー<ruby>釣<rt>つ</rt></ruby>りに<ruby>挑戦<rt>ちょうせん</rt></ruby>しよう！",
+    success:
+      "<ruby>水<rt>みず</rt></ruby>の<ruby>冒険<rt>ぼうけん</rt></ruby>クリア！ヨーヨーを<ruby>上手<rt>じょうず</rt></ruby>に<ruby>釣<rt>つ</rt></ruby>り<ruby>上<rt>あ</rt></ruby>げたぞ！",
+    next:
+      "<ruby>水<rt>みず</rt></ruby>のスタンプをゲット！ほかの<ruby>冒険<rt>ぼうけん</rt></ruby>にも<ruby>挑戦<rt>ちょうせん</rt></ruby>しよう！",
+    scene: "water"
+  },
+  {
+    id: "fire",
+    name: "<ruby>火<rt>ひ</rt></ruby>の<ruby>冒険<rt>ぼうけん</rt></ruby>",
+    emoji: "🔥",
+    qr: "FIRE",
+    before:
+      "ボタンを<ruby>連打<rt>れんだ</rt></ruby>して、<ruby>火<rt>ひ</rt></ruby>のボスを<ruby>撃破<rt>げきは</rt></ruby>しよう！",
+    success:
+      "<ruby>火<rt>ひ</rt></ruby>の<ruby>冒険<rt>ぼうけん</rt></ruby>クリア！ボタン<ruby>連打<rt>れんだ</rt></ruby>で<ruby>火<rt>ひ</rt></ruby>のボスを<ruby>倒<rt>たお</rt></ruby>したぞ！",
+    next:
+      "<ruby>火<rt>ひ</rt></ruby>のスタンプをゲット！3つのスタンプをすべて<ruby>集<rt>あつ</rt></ruby>めよう！",
+    scene: "fire"
+  }
+];
 
     let completed = loadProgress();
     let playerName = localStorage.getItem(STORAGE_NAME) || "";
@@ -966,74 +975,88 @@
     }
 
     function renderStart() {
-      const hasProgress = completed.length > 0;
+  const hasProgress = completed.length > 0;
 
-      setScreen(`
-        <div class="hero">
-          <div class="pill">🌿 わくなつスペシャル 🌿</div>
+  setScreen(`
+    <div class="hero">
+      <div class="pill">🌟 ワクワク！IT<ruby>探検隊<rt>たんけんたい</rt></ruby> 🌟</div>
 
-          <h1>
-            ワクワクITたんけんたい
-            <br>
-            <span style="font-size:.58em">～ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>せ！～</span>
-          </h1>
+      <h1>
+        ワクワク！<br>
+        IT<ruby>探検隊<rt>たんけんたい</rt></ruby>
+      </h1>
 
-          <div class="hero-icon">📱🌴🧭</div>
+      <div class="hero-icon">📱🧭✨</div>
 
-          <div class="glass">
-            <p><strong>スマホとリアルな<ruby>遊<rt>あそ</rt></ruby>びがつながるジャングル<ruby>冒険<rt>ぼうけん</rt></ruby>ゲーム！</strong></p>
+      <div class="glass">
+        <p>
+          <strong>
+            <ruby>冒険者<rt>ぼうけんしゃ</rt></ruby>のみんな、
+            「ワクワク！IT<ruby>探検隊<rt>たんけんたい</rt></ruby>」へようこそ！
+          </strong>
+        </p>
 
-            <div class="rules">
-              <div class="rule"><span>1</span><div><ruby>各<rt>かく</rt></ruby>ブースのミッションに<ruby>挑戦<rt>ちょうせん</rt></ruby></div></div>
-              <div class="rule"><span>2</span><div><ruby>成功<rt>せいこう</rt></ruby>したらQRコードを<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>る</div></div>
-              <div class="rule"><span>3</span><div>ストーリーを<ruby>進<rt>すす</rt></ruby>めてボスを<ruby>倒<rt>たお</rt></ruby>す</div></div>
-            </div>
-          </div>
+        <p style="margin-top:10px">
+          スマホでQRコードを<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>って、
+          <ruby>冒険<rt>ぼうけん</rt></ruby>スタートだよ！
+        </p>
+      </div>
 
-          <button
-            class="primary"
-            type="button"
-            onclick="${hasProgress ? "renderMissionHub()" : "renderOpening()"}"
-          >
-            ${hasProgress ? "<ruby>続<rt>つづ</rt></ruby>きから<ruby>遊<rt>あそ</rt></ruby>ぶ" : "たんけんスタート！"}
-          </button>
+      <button
+        class="primary"
+        type="button"
+        onclick="${hasProgress ? "renderMissionHub()" : "renderOpening()"}"
+      >
+        ${hasProgress
+          ? "<ruby>続<rt>つづ</rt></ruby>きから<ruby>遊<rt>あそ</rt></ruby>ぶ"
+          : "<ruby>冒険<rt>ぼうけん</rt></ruby>スタート！"
+        }
+      </button>
 
-          <button
-            class="ghost"
-            type="button"
-            onclick="resetGame()"
-          >
-            さいしょからやりなおす
-          </button>
-        </div>
-      `);
-    }
+      <button class="ghost" type="button" onclick="resetGame()">
+        <ruby>最初<rt>さいしょ</rt></ruby>からやり<ruby>直<rt>なお</rt></ruby>す
+      </button>
+    </div>
+  `);
+}
+  
 
     function renderOpening() {
-      setScreen(`
-        <div class="story">
-          <div class="pill">🎬 オープニング</div>
-          <h2>ジャングルの<ruby>奥<rt>おく</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>もう</h2>
+  setScreen(`
+    <div class="story">
+      <div class="pill">🧭 <ruby>冒険<rt>ぼうけん</rt></ruby>の<ruby>準備<rt>じゅんび</rt></ruby></div>
 
-          <div class="scene">
-            <div class="forest-left"></div>
-            <div class="forest-right"></div>
-            <div class="path"></div>
-            <div class="scene-text">ザサザサ…<ruby>木々<rt>きぎ</rt></ruby>をかき<ruby>分<rt>わ</rt></ruby>けて、ジャングルの<ruby>奥<rt>おく</rt></ruby>へ！</div>
-          </div>
+      <h2>
+        まずは「<ruby>仲間<rt>なかま</rt></ruby>の<ruby>証<rt>あかし</rt></ruby>」を
+        <ruby>作<rt>つく</rt></ruby>ろう！
+      </h2>
 
-          <div class="glass">
-            <p><strong>ジャングルへようこそ！</strong></p>
-            <p><ruby>悪<rt>わる</rt></ruby>いボスを<ruby>倒<rt>たお</rt></ruby>しに<ruby>行<rt>い</rt></ruby>こう！</p>
-            <p style="margin-top:10px">…ああっ！<ruby>目<rt>め</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>に<ruby>大<rt>おお</rt></ruby>きな<ruby>丸太<rt>まるた</rt></ruby>が！</p>
-          </div>
+      <div class="hero-icon">🎨🪭✨</div>
 
-          <button class="primary" type="button" onclick="renderMissionHub()">
-            <ruby>缶倒<rt>かんたお</rt></ruby>しブースへGO！
-          </button>
-        </div>
-      `);
-    }
+      <div class="glass">
+        <p>
+          この<ruby>教室内<rt>きょうしつない</rt></ruby>にある
+          3つの<ruby>冒険<rt>ぼうけん</rt></ruby>をクリアして、
+          3つのスタンプを<ruby>集<rt>あつ</rt></ruby>めよう！
+        </p>
+
+        <p style="margin-top:14px">
+          まずは<ruby>自分<rt>じぶん</rt></ruby>だけの
+          「うちわ」を<ruby>描<rt>か</rt></ruby>こう！
+        </p>
+
+        <p style="margin-top:8px">
+          これが<ruby>冒険者<rt>ぼうけんしゃ</rt></ruby>の
+          『<ruby>仲間<rt>なかま</rt></ruby>の<ruby>証<rt>あかし</rt></ruby>』になるよ！
+        </p>
+      </div>
+
+      <button class="primary" type="button" onclick="renderMissionHub()">
+        3つの<ruby>冒険<rt>ぼうけん</rt></ruby>へ！
+      </button>
+    </div>
+  `);
+}
 
     function renderMissionHub() {
       const complete = completed.length === missions.length;
@@ -1108,36 +1131,67 @@
       `);
     }
 
-    function sceneHtml(scene) {
-      if (scene === "log") {
-        return `
-          <div class="scene">
-            <div class="path"></div>
-            <div class="log-pile">🪵🪵🪵</div>
-            <div class="scene-text">ガラガラガッシャーン！<ruby>丸太<rt>まるた</rt></ruby>が<ruby>崩<rt>くず</rt></ruby>れて<ruby>道<rt>みち</rt></ruby>が<ruby>開<rt>ひら</rt></ruby>いた！</div>
-          </div>
-        `;
-      }
-
-      if (scene === "sun") {
-        return `
-          <div class="scene">
-            <div class="river"></div>
-            <div class="sun-drop">☀️</div>
-            <div class="scene-text">ザバーン！<ruby>太陽<rt>たいよう</rt></ruby>のしずくを<ruby>救<rt>すく</rt></ruby>い<ruby>上<rt>あ</rt></ruby>げた！</div>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="scene">
-          <div class="boss">👹</div>
-          <div class="energy"></div>
-          <div class="scene-text"><ruby>元気玉<rt>げんきだま</rt></ruby>がボスに<ruby>直撃<rt>ちょくげき</rt></ruby>！ボスは<ruby>降参<rt>こうさん</rt></ruby>した！</div>
+   function sceneHtml(scene) {
+  if (scene === "wind") {
+    return `
+      <div class="scene">
+        <div style="
+          position:absolute;
+          inset:0;
+          display:grid;
+          place-items:center;
+          z-index:5;
+          font-size:76px;
+          animation:pop 1s ease-in-out infinite;
+        ">
+          🌪️⭕
         </div>
-      `;
-    }
 
+        <div class="scene-text">
+          <ruby>輪投<rt>わな</rt></ruby>げ<ruby>成功<rt>せいこう</rt></ruby>！
+          <ruby>風<rt>かぜ</rt></ruby>のスタンプをゲット！
+        </div>
+      </div>
+    `;
+  }
+
+  if (scene === "water") {
+    return `
+      <div class="scene">
+        <div class="river"></div>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          bottom:40px;
+          transform:translateX(-50%);
+          z-index:5;
+          font-size:70px;
+          animation:dropUp 3s ease forwards;
+        ">
+          🎈💦
+        </div>
+
+        <div class="scene-text">
+          ヨーヨーを<ruby>釣<rt>つ</rt></ruby>り<ruby>上<rt>あ</rt></ruby>げた！
+          <ruby>水<rt>みず</rt></ruby>のスタンプをゲット！
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="scene">
+      <div class="boss">🔥👹</div>
+      <div class="energy"></div>
+
+      <div class="scene-text">
+        <ruby>火<rt>ひ</rt></ruby>のボスを<ruby>撃破<rt>げきは</rt></ruby>！
+        <ruby>火<rt>ひ</rt></ruby>のスタンプをゲット！
+      </div>
+    </div>
+  `;
+}
     function renderSuccess(mission) {
       setScreen(`
         <div class="story">
