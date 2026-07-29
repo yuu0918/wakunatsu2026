@@ -541,17 +541,17 @@
       transform: translateY(-2px);
     }
 
-    .mission-card.log.done {
+    .mission-card.wind.done {
       background: linear-gradient(160deg, #fef3c7, #d6a56f);
       border-color: #92400e;
     }
 
-    .mission-card.sun.done {
+    .mission-card.water.done {
       background: linear-gradient(160deg, #fff7c2, #facc15);
       border-color: #f59e0b;
     }
 
-    .mission-card.boss-card.done {
+    .mission-card.fire.done {
       background: linear-gradient(160deg, #fecaca, #f87171);
       border-color: #dc2626;
     }
@@ -810,6 +810,50 @@
         font-size: 44px;
       }
     }
+
+    /* スタート画面で右側からのぞく火のボス */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .peek-boss {
+      position: absolute;
+      top: 70px;
+      right: -135px;
+      width: 390px;
+      max-width: none;
+      height: auto;
+      z-index: 1;
+      pointer-events: none;
+      user-select: none;
+      filter: drop-shadow(0 10px 12px rgba(88, 28, 0, .28));
+      animation: peekBoss 4s ease-in-out infinite;
+    }
+
+    .hero > *:not(.peek-boss) {
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes peekBoss {
+      0%, 100% {
+        transform: translateX(20px);
+      }
+      50% {
+        transform: translateX(-12px);
+      }
+    }
+
+    @media (max-width: 380px) {
+      .peek-boss {
+        top: 82px;
+        right: -188px;
+        width: 350px;
+      }
+    }
+
   </style>
 </head>
 
@@ -966,6 +1010,14 @@
         .replaceAll("'", "&#039;");
     }
 
+    function displayPlayerName() {
+      if (playerName === "探検隊") {
+        return "<ruby>探検隊<rt>たんけんたい</rt></ruby>";
+      }
+
+      return escapeHtml(playerName);
+    }
+
     function setScreen(content) {
       screen.classList.remove("screen");
       void screen.offsetWidth;
@@ -979,6 +1031,7 @@
 
   setScreen(`
     <div class="hero">
+      <img src="./fire-bosu-transparent.png" class="peek-boss" alt="" aria-hidden="true">
       <div class="pill">🌟 ワクワク！IT<ruby>探検隊<rt>たんけんたい</rt></ruby> 🌟</div>
 
       <h1>
@@ -1093,7 +1146,7 @@
             ? `
               <div class="next-box">
                 🎉 すべてのミッションをクリア！<br>
-                ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>したぞ！
+                3つの<ruby>冒険<rt>ぼうけん</rt></ruby>をすべてクリアしたぞ！
               </div>
 
               <button class="primary" type="button" onclick="renderCertificateForm()">
@@ -1207,7 +1260,7 @@
           <div class="next-box">${mission.next}</div>
 
           <button class="primary" type="button" onclick="renderMissionHub()">
-            ${mission.id === "boss" ? "<ruby>認定証<rt>にんていしょう</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>む" : "<ruby>次<rt>つぎ</rt></ruby>のミッションへ"}
+            "ミッションマップへ<ruby>戻<rt>もど</rt></ruby>る"
           </button>
         </div>
       `);
@@ -1457,7 +1510,7 @@
     function createCertificate() {
       const input = document.getElementById("nameInput");
 
-      playerName = input.value.trim() || "<ruby>探検隊<rt>たんけんたい</rt></ruby>";
+      playerName = input.value.trim() || "探検隊";
       save();
       renderCertificate();
     }
@@ -1469,15 +1522,15 @@
 
         <div class="certificate">
           <div class="cert-label">MISSION COMPLETE</div>
-          <div class="cert-title">ジャングル<ruby>探検認定証<rt>たんけんにんていしょう</rt></ruby></div>
+          <div class="cert-title">IT<ruby>探検隊認定証<rt>たんけんたいにんていしょう</rt></ruby></div>
 
           <p style="position:relative;z-index:1">
             あなたは3つのミッションをクリアし、
             <br>
-            ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>しました。
+            3つの<ruby>冒険<rt>ぼうけん</rt></ruby>をすべてクリアしました。
           </p>
 
-          <div class="cert-name">${escapeHtml(playerName)}</div>
+          <div class="cert-name">${displayPlayerName()}</div>
 
           <p style="position:relative;z-index:1">
             すばらしい<ruby>勇気<rt>ゆうき</rt></ruby>とチャレンジする力を
@@ -1486,10 +1539,10 @@
           </p>
 
           <p style="position:relative;z-index:1;font-size:36px;margin-top:12px">
-            🪵 ☀️ 👹
+            🌪️ 💧 🔥
           </p>
 
-          <div class="stamp"><ruby>認定<rt>にんてい/<rt></ruby></div>
+          <div class="stamp"><ruby>認定<rt>にんてい</rt></ruby></div>
         </div>
 
         <button class="primary" type="button" onclick="renderClear()">
@@ -1524,8 +1577,8 @@
           <div class="hero-icon">🏆</div>
 
           <div class="glass">
-            <h2>${escapeHtml(playerName)}</h2>
-            <p>ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>したぞ！</p>
+            <h2>${displayPlayerName()}</h2>
+            <p>3つの<ruby>冒険<rt>ぼうけん</rt></ruby>をすべてクリアしたぞ！</p>
 
             <p style="margin-top:10px">
               <strong>
