@@ -965,6 +965,13 @@
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
     }
+    function displayPlayerName() {
+  if (playerName === "探検隊") {
+    return "<ruby>探検隊<rt>たんけんたい</rt></ruby>";
+  }
+
+  return escapeHtml(playerName);
+}
 
     function setScreen(content) {
       screen.classList.remove("screen");
@@ -1457,7 +1464,7 @@
     function createCertificate() {
       const input = document.getElementById("nameInput");
 
-      playerName = input.value.trim() || "<ruby>探検隊<rt>たんけんたい</rt></ruby>";
+      playerName = input.value.trim() || "探検隊";
       save();
       renderCertificate();
     }
@@ -1477,7 +1484,7 @@
             ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>しました。
           </p>
 
-          <div class="cert-name">${escapeHtml(playerName)}</div>
+          <div class="cert-name">${displayPlayerName()}</div>
 
           <p style="position:relative;z-index:1">
             すばらしい<ruby>勇気<rt>ゆうき</rt></ruby>とチャレンジする力を
@@ -1524,7 +1531,7 @@
           <div class="hero-icon">🏆</div>
 
           <div class="glass">
-            <h2>${escapeHtml(playerName)}</h2>
+            <h2>${displayPlayerName()}</h2>
             <p>ジャングルのボスを<ruby>倒<rt>たお</rt></ruby>したぞ！</p>
 
             <p style="margin-top:10px">
