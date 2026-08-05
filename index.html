@@ -886,9 +886,25 @@
   <script>
     "use strict";
 
-    const STORAGE_PROGRESS = "wakuwaku_final_progress_v1";
-    const STORAGE_NAME = "wakuwaku_final_name_v1";
-    const STAFF_PASSWORD = "2026";
+   const STORAGE_PROGRESS_BASE = "wakuwaku_final_progress_v1";
+const STORAGE_NAME_BASE = "wakuwaku_final_name_v1";
+const STAFF_PASSWORD = "2026";
+
+/* URLの ?player=1 などを読み取る */
+const urlParams = new URLSearchParams(window.location.search);
+const PLAYER_ID = urlParams.get("player");
+
+/* 遊ぶ人ごとに別の保存場所を作る */
+function playerStorageKey(baseKey) {
+  if (!PLAYER_ID) {
+    return baseKey;
+  }
+
+  return `${baseKey}_player_${PLAYER_ID}`;
+}
+
+const STORAGE_PROGRESS = playerStorageKey(STORAGE_PROGRESS_BASE);
+const STORAGE_NAME = playerStorageKey(STORAGE_NAME_BASE);
 
    const missions = [
   {
