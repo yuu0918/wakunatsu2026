@@ -812,7 +812,51 @@
     }
 
 
+/* 兄弟・参加者選択画面 */
+.player-select {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
 
+.player-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.player-button {
+  min-height: 92px;
+  margin: 0;
+  background: linear-gradient(180deg, #fff7ed, #ffedd5);
+  color: #9a3412;
+  border: 3px solid #fdba74;
+  box-shadow: 0 5px 0 #fb923c;
+}
+
+.player-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  margin: 0 auto 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  border: 2px solid #c7d2fe;
+  color: #4338ca;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.switch-player {
+  background: #eef2ff;
+  color: #4338ca;
+  border: 2px solid #c7d2fe;
+}
   </style>
 </head>
 
@@ -992,7 +1036,97 @@ const STORAGE_NAME = playerStorageKey(STORAGE_NAME_BASE);
 
       return escapeHtml(playerName);
     }
+function playerLabel() {
+  if (!PLAYER_ID) {
+    return "";
+  }
 
+  return `${PLAYER_ID}人目`;
+}
+
+/* 選んだ人のURLへ移動 */
+function selectPlayer(id) {
+  const nextUrl = new URL(window.location.href);
+
+  nextUrl.searchParams.set("player", String(id));
+
+  window.location.href = nextUrl.toString();
+}
+
+/* 人選択画面へ戻る */
+function changePlayer() {
+  const nextUrl = new URL(window.location.href);
+
+  nextUrl.searchParams.delete("player");
+
+  window.location.href = nextUrl.toString();
+}
+
+/* 最初に表示する人選択画面 */
+function renderPlayerSelect() {
+  setScreen(`
+    <div class="player-select">
+      <div class="pill">
+        👨‍👩‍👧‍👦 きょうだいで<ruby>遊<rt>あそ</rt></ruby>べる
+      </div>
+
+      <h1>
+        <ruby>遊<rt>あそ</rt></ruby>ぶ<ruby>人<rt>ひと</rt></ruby>を
+        <br>
+        <ruby>選<rt>えら</rt></ruby>ぼう！
+      </h1>
+
+      <div class="glass">
+        <p>
+          1<ruby>台<rt>だい</rt></ruby>のスマホでも、
+          それぞれのスタンプを
+          <ruby>別々<rt>べつべつ</rt></ruby>に
+          <ruby>保存<rt>ほぞん</rt></ruby>できるよ。
+        </p>
+      </div>
+
+      <div class="player-grid">
+        <button
+          class="player-button"
+          type="button"
+          onclick="selectPlayer(1)"
+        >
+          👤 1<ruby>人目<rt>にんめ</rt></ruby>
+        </button>
+
+        <button
+          class="player-button"
+          type="button"
+          onclick="selectPlayer(2)"
+        >
+          👤 2<ruby>人目<rt>にんめ</rt></ruby>
+        </button>
+
+        <button
+          class="player-button"
+          type="button"
+          onclick="selectPlayer(3)"
+        >
+          👤 3<ruby>人目<rt>にんめ</rt></ruby>
+        </button>
+
+        <button
+          class="player-button"
+          type="button"
+          onclick="selectPlayer(4)"
+        >
+          👤 4<ruby>人目<rt>にんめ</rt></ruby>
+        </button>
+      </div>
+
+      <div class="footer">
+        <ruby>続<rt>つづ</rt></ruby>きからするときは、
+        <ruby>同<rt>おな</rt></ruby>じ<ruby>番号<rt>ばんごう</rt></ruby>を
+        <ruby>選<rt>えら</rt></ruby>んでね
+      </div>
+    </div>
+  `);
+}
     function setScreen(content) {
       screen.classList.remove("screen");
       void screen.offsetWidth;
@@ -1006,6 +1140,9 @@ const STORAGE_NAME = playerStorageKey(STORAGE_NAME_BASE);
 
   setScreen(`
     <div class="hero">
+      <div class="player-badge">
+  👤 ${playerLabel()}
+</div>
       <div class="pill">🌟 2026伊藤ゼミ🌟</div>
 
       <h1>
@@ -1043,6 +1180,16 @@ const STORAGE_NAME = playerStorageKey(STORAGE_NAME_BASE);
       <button class="ghost" type="button" onclick="resetGame()">
         <ruby>最初<rt>さいしょ</rt></ruby>からやり<ruby>直<rt>なお</rt></ruby>す
       </button>
+      <button
+  class="switch-player"
+  type="button"
+  onclick="changePlayer()"
+>
+  👨‍👩‍👧‍👦
+  <ruby>遊<rt>あそ</rt></ruby>ぶ
+  <ruby>人<rt>ひと</rt></ruby>を
+  <ruby>変<rt>か</rt></ruby>える
+</button>
     </div>
   `);
 }
@@ -1591,7 +1738,14 @@ const STORAGE_NAME = playerStorageKey(STORAGE_NAME_BASE);
       renderStart();
     }
 
-    renderStart();
+    if (
+  PLAYER_ID &&
+  ["1", "2", "3", "4"].includes(PLAYER_ID)
+) {
+  renderStart();
+} else {
+  renderPlayerSelect();
+}
   </script>
 </body>
 </html>
