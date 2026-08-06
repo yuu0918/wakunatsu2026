@@ -615,99 +615,12 @@
       border-color: #86efac;
     }
 
-    .name-input {
-      width: 100%;
-      border: 3px solid #bbf7d0;
-      border-radius: 20px;
-      padding: 16px;
-      font-size: 20px;
-      text-align: center;
-      font-weight: 900;
-      color: #14532d;
-      outline: none;
-      background: #fff;
-      margin: 14px 0;
-    }
 
-    .certificate {
-      position: relative;
-      margin: 18px 0;
-      padding: 24px 16px;
-      border-radius: 28px;
-      background: linear-gradient(180deg, #fffdf0, #fef3c7);
-      border: 5px solid #facc15;
-      text-align: center;
-      box-shadow: 0 12px 24px rgba(146,64,14,.12);
-      overflow: hidden;
-    }
 
-    .certificate::before,
-    .certificate::after {
-      content: "✦";
-      position: absolute;
-      color: rgba(245,158,11,.25);
-      font-size: 80px;
-    }
 
-    .certificate::before {
-      top: -20px;
-      left: 10px;
-    }
 
-    .certificate::after {
-      right: 10px;
-      bottom: -32px;
-    }
 
-    .cert-label {
-      position: relative;
-      z-index: 1;
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: #16a34a;
-      color: #fff;
-      font-weight: 900;
-      margin-bottom: 12px;
-    }
 
-    .cert-title {
-      position: relative;
-      z-index: 1;
-      color: #92400e;
-      font-size: 31px;
-      font-weight: 900;
-    }
-
-    .cert-name {
-      position: relative;
-      z-index: 1;
-      display: inline-block;
-      max-width: 100%;
-      margin: 14px 0;
-      padding: 4px 18px 6px;
-      border-bottom: 4px solid #facc15;
-      color: #14532d;
-      font-size: 29px;
-      font-weight: 900;
-      overflow-wrap: anywhere;
-    }
-
-    .stamp {
-      position: relative;
-      z-index: 1;
-      width: 92px;
-      height: 92px;
-      margin: 16px auto 0;
-      border-radius: 50%;
-      border: 5px solid #ef4444;
-      color: #ef4444;
-      display: grid;
-      place-items: center;
-      font-weight: 900;
-      transform: rotate(-10deg);
-      background: rgba(255,255,255,.5);
-    }
 
     .confetti {
       position: absolute;
@@ -784,6 +697,39 @@
       line-height: 1.65;
     }
 
+    /* 人数選択 */
+    .player-count-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 6px 0 18px;
+    }
+
+    .player-count-button {
+      min-height: 88px;
+      margin: 0;
+      padding: 12px;
+      background: #f0fdf4;
+      color: #166534;
+      border: 3px solid #bbf7d0;
+      box-shadow: 0 5px 0 #86efac;
+      font-size: 18px;
+    }
+
+    .player-count-button span {
+      display: block;
+      font-size: 34px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .player-count-button.selected {
+      background: linear-gradient(180deg, #34d399, #16a34a);
+      color: #fff;
+      border-color: #15803d;
+      box-shadow: 0 6px 0 #166534;
+    }
+
     @media (max-width: 360px) {
       body {
         padding: 8px;
@@ -812,51 +758,7 @@
     }
 
 
-/* 兄弟・参加者選択画面 */
-.player-select {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
 
-.player-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 18px 0;
-}
-
-.player-button {
-  min-height: 92px;
-  margin: 0;
-  background: linear-gradient(180deg, #fff7ed, #ffedd5);
-  color: #9a3412;
-  border: 3px solid #fdba74;
-  box-shadow: 0 5px 0 #fb923c;
-}
-
-.player-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: center;
-  margin: 0 auto 10px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: #eef2ff;
-  border: 2px solid #c7d2fe;
-  color: #4338ca;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.switch-player {
-  background: #eef2ff;
-  color: #4338ca;
-  border: 2px solid #c7d2fe;
-}
   </style>
 </head>
 
@@ -914,10 +816,10 @@
 
   <div id="scannerModal" class="modal" aria-hidden="true">
     <div class="modal-card">
-      <div class="pill">📷 ミッションQR</div>
-      <h2>QRコードを<ruby>読<rt>み</rt></ruby>み<ruby>取<rt>と</rt></ruby>ろう</h2>
+      <div id="scannerPill" class="pill">📷 ミッションQR</div>
+      <h2 id="scannerTitle">QRコードを<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>ろう</h2>
 
-      <div class="scan-note">
+      <div id="scannerNote" class="scan-note">
         ミッションに<ruby>成功<rt>せいこう</rt></ruby>したら、スタッフが<ruby>案内<rt>あんない</rt></ruby>するQRコードをカメラに<ruby>写<rt>うつ</rt></ruby>してね。
       </div>
 
@@ -930,25 +832,9 @@
   <script>
     "use strict";
 
-   const STORAGE_PROGRESS_BASE = "wakuwaku_final_progress_v1";
-const STORAGE_NAME_BASE = "wakuwaku_final_name_v1";
-const STAFF_PASSWORD = "2026";
-
-/* URLの ?player=1 などを読み取る */
-const urlParams = new URLSearchParams(window.location.search);
-const PLAYER_ID = urlParams.get("player");
-
-/* 遊ぶ人ごとに別の保存場所を作る */
-function playerStorageKey(baseKey) {
-  if (!PLAYER_ID) {
-    return baseKey;
-  }
-
-  return `${baseKey}_player_${PLAYER_ID}`;
-}
-
-const STORAGE_PROGRESS = playerStorageKey(STORAGE_PROGRESS_BASE);
-const STORAGE_NAME = playerStorageKey(STORAGE_NAME_BASE);
+    const STORAGE_PROGRESS = "wakuwaku_final_progress_v1";
+    const STORAGE_PLAYER_COUNT = "wakuwaku_player_count_v1";
+    const STAFF_PASSWORD = "2026";
 
    const missions = [
   {
@@ -993,13 +879,17 @@ const STORAGE_NAME = playerStorageKey(STORAGE_NAME_BASE);
 ];
 
     let completed = loadProgress();
-    let playerName = localStorage.getItem(STORAGE_NAME) || "";
+    let playerCount = Number(localStorage.getItem(STORAGE_PLAYER_COUNT)) || 1;
     let qrScanner = null;
     let scanning = false;
+    let scannerMode = "mission";
 
     const screen = document.getElementById("screen");
     const scannerModal = document.getElementById("scannerModal");
     const staffLoginModal = document.getElementById("staffLoginModal");
+    const scannerPill = document.getElementById("scannerPill");
+    const scannerTitle = document.getElementById("scannerTitle");
+    const scannerNote = document.getElementById("scannerNote");
 
     function loadProgress() {
       try {
@@ -1017,116 +907,10 @@ const STORAGE_NAME = playerStorageKey(STORAGE_NAME_BASE);
 
     function save() {
       localStorage.setItem(STORAGE_PROGRESS, JSON.stringify(completed));
-      localStorage.setItem(STORAGE_NAME, playerName);
+      localStorage.setItem(STORAGE_PLAYER_COUNT, String(playerCount));
     }
 
-    function escapeHtml(text) {
-      return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
 
-    function displayPlayerName() {
-      if (playerName === "探検隊") {
-        return "<ruby>探検隊<rt>たんけんたい</rt></ruby>";
-      }
-
-      return escapeHtml(playerName);
-    }
-function playerLabel() {
-  if (!PLAYER_ID) {
-    return "";
-  }
-
-  return `${PLAYER_ID}人目`;
-}
-
-/* 選んだ人のURLへ移動 */
-function selectPlayer(id) {
-  const nextUrl = new URL(window.location.href);
-
-  nextUrl.searchParams.set("player", String(id));
-
-  window.location.href = nextUrl.toString();
-}
-
-/* 人選択画面へ戻る */
-function changePlayer() {
-  const nextUrl = new URL(window.location.href);
-
-  nextUrl.searchParams.delete("player");
-
-  window.location.href = nextUrl.toString();
-}
-
-/* 最初に表示する人選択画面 */
-function renderPlayerSelect() {
-  setScreen(`
-    <div class="player-select">
-      <div class="pill">
-        👨‍👩‍👧‍👦 きょうだいで<ruby>遊<rt>あそ</rt></ruby>べる
-      </div>
-
-      <h1>
-        <ruby>遊<rt>あそ</rt></ruby>ぶ<ruby>人<rt>ひと</rt></ruby>を
-        <br>
-        <ruby>選<rt>えら</rt></ruby>ぼう！
-      </h1>
-
-      <div class="glass">
-        <p>
-          1<ruby>台<rt>だい</rt></ruby>のスマホでも、
-          それぞれのスタンプを
-          <ruby>別々<rt>べつべつ</rt></ruby>に
-          <ruby>保存<rt>ほぞん</rt></ruby>できるよ。
-        </p>
-      </div>
-
-      <div class="player-grid">
-        <button
-          class="player-button"
-          type="button"
-          onclick="selectPlayer(1)"
-        >
-          👤 1<ruby>人目<rt>にんめ</rt></ruby>
-        </button>
-
-        <button
-          class="player-button"
-          type="button"
-          onclick="selectPlayer(2)"
-        >
-          👤 2<ruby>人目<rt>にんめ</rt></ruby>
-        </button>
-
-        <button
-          class="player-button"
-          type="button"
-          onclick="selectPlayer(3)"
-        >
-          👤 3<ruby>人目<rt>にんめ</rt></ruby>
-        </button>
-
-        <button
-          class="player-button"
-          type="button"
-          onclick="selectPlayer(4)"
-        >
-          👤 4<ruby>人目<rt>にんめ</rt></ruby>
-        </button>
-      </div>
-
-      <div class="footer">
-        <ruby>続<rt>つづ</rt></ruby>きからするときは、
-        <ruby>同<rt>おな</rt></ruby>じ<ruby>番号<rt>ばんごう</rt></ruby>を
-        <ruby>選<rt>えら</rt></ruby>んでね
-      </div>
-    </div>
-  `);
-}
     function setScreen(content) {
       screen.classList.remove("screen");
       void screen.offsetWidth;
@@ -1140,10 +924,7 @@ function renderPlayerSelect() {
 
   setScreen(`
     <div class="hero">
-      <div class="player-badge">
-  👤 ${playerLabel()}
-</div>
-      <div class="pill">🌟 2026伊藤ゼミ🌟</div>
+      <div class="pill">🌟 ワクワク！IT<ruby>探検隊<rt>たんけんたい</rt></ruby> 🌟</div>
 
       <h1>
         ワクワク！<br>
@@ -1169,7 +950,7 @@ function renderPlayerSelect() {
       <button
         class="primary"
         type="button"
-        onclick="${hasProgress ? "renderMissionHub()" : "renderOpening()"}"
+        onclick="${hasProgress ? "renderMissionHub()" : "renderPlayerCount()"}"
       >
         ${hasProgress
           ? "<ruby>続<rt>つづ</rt></ruby>きから<ruby>遊<rt>あそ</rt></ruby>ぶ"
@@ -1180,20 +961,45 @@ function renderPlayerSelect() {
       <button class="ghost" type="button" onclick="resetGame()">
         <ruby>最初<rt>さいしょ</rt></ruby>からやり<ruby>直<rt>なお</rt></ruby>す
       </button>
-      <button
-  class="switch-player"
-  type="button"
-  onclick="changePlayer()"
->
-  👨‍👩‍👧‍👦
-  <ruby>遊<rt>あそ</rt></ruby>ぶ
-  <ruby>人<rt>ひと</rt></ruby>を
-  <ruby>変<rt>か</rt></ruby>える
-</button>
     </div>
   `);
 }
   
+
+    function renderPlayerCount() {
+      setScreen(`
+        <div class="story">
+          <div class="pill">👥 <ruby>人数選択<rt>にんずうせんたく</rt></ruby></div>
+          <h1>なんにんで<br><ruby>冒険<rt>ぼうけん</rt></ruby>する？</h1>
+          <div class="hero-icon">🧑‍🤝‍🧑</div>
+          <div class="glass">
+            <p>いっしょに<ruby>冒険<rt>ぼうけん</rt></ruby>する<ruby>人数<rt>にんずう</rt></ruby>を<ruby>選<rt>えら</rt></ruby>んでね！</p>
+          </div>
+          <div class="player-count-grid">
+            ${[1, 2, 3, 4].map(count => `
+              <button class="player-count-button ${playerCount === count ? "selected" : ""}" type="button" onclick="selectPlayerCount(${count})">
+                <span>${count}</span><ruby>人<rt>にん</rt></ruby>
+              </button>
+            `).join("")}
+          </div>
+          <button class="primary" type="button" onclick="confirmPlayerCount()">
+            この<ruby>人数<rt>にんずう</rt></ruby>で<ruby>冒険<rt>ぼうけん</rt></ruby>する！
+          </button>
+          <button class="ghost" type="button" onclick="renderStart()"><ruby>戻<rt>もど</rt></ruby>る</button>
+        </div>
+      `);
+    }
+
+    function selectPlayerCount(count) {
+      playerCount = count;
+      localStorage.setItem(STORAGE_PLAYER_COUNT, String(playerCount));
+      renderPlayerCount();
+    }
+
+    function confirmPlayerCount() {
+      localStorage.setItem(STORAGE_PLAYER_COUNT, String(playerCount));
+      renderOpening();
+    }
 
     function renderOpening() {
   setScreen(`
@@ -1208,6 +1014,9 @@ function renderPlayerSelect() {
       <div class="hero-icon">🎨🪭✨</div>
 
       <div class="glass">
+        <p style="margin-bottom:12px;color:#166534;font-weight:900">
+          👥 ${playerCount}<ruby>人<rt>にん</rt></ruby>で<ruby>冒険<rt>ぼうけん</rt></ruby>するよ！
+        </p>
         <p>
           この<ruby>教室内<rt>きょうしつない</rt></ruby>にある
           3つの<ruby>冒険<rt>ぼうけん</rt></ruby>をクリアして、
@@ -1270,8 +1079,8 @@ function renderPlayerSelect() {
                 3つの<ruby>冒険<rt>ぼうけん</rt></ruby>をすべてクリアしたぞ！
               </div>
 
-              <button class="primary" type="button" onclick="renderCertificateForm()">
-                <ruby>認定証<rt>にんていしょう</rt></ruby>を<ruby>作<rt>つく</rt></ruby>る
+              <button class="primary" type="button" onclick="renderRewardScreen()">
+                クリア<ruby>画面<rt>がめん</rt></ruby>へ
               </button>
             `
             : `
@@ -1388,6 +1197,13 @@ function renderPlayerSelect() {
     }
 
     function openScanner() {
+      scannerMode = "mission";
+
+      scannerPill.innerHTML = "📷 ミッションQR";
+      scannerTitle.innerHTML = "QRコードを<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>ろう";
+      scannerNote.innerHTML =
+        "ミッションに<ruby>成功<rt>せいこう</rt></ruby>したら、スタッフが<ruby>案内<rt>あんない</rt></ruby>するQRコードをカメラに<ruby>写<rt>うつ</rt></ruby>してね。";
+
       scannerModal.classList.add("show");
       scannerModal.setAttribute("aria-hidden", "false");
 
@@ -1412,10 +1228,15 @@ function renderPlayerSelect() {
           aspectRatio: 1
         },
         decodedText => {
+          if (scannerMode === "ar") {
+            processArQr(decodedText);
+            return;
+          }
+
           const mission = findMission(decodedText);
 
           if (!mission) {
-            alert("このQRコードは<ruby>今回<rt>こんかい</rt></ruby>のミッション<ruby>用<rt>よう</rt></ruby>ではありません。");
+            alert("このQRコードは今回のミッション用ではありません。");
             return;
           }
 
@@ -1425,6 +1246,70 @@ function renderPlayerSelect() {
       ).catch(() => {
         alert("カメラを<ruby>起動<rt>きどう</rt></ruby>できませんでした。GitHub PagesなどのHTTPSのURLで<ruby>開<rt>ひら</rt></ruby>き、カメラ<ruby>許可<rt>きょか</rt></ruby>をオンにしてください。");
         closeScanner();
+      });
+    }
+
+    function openArScanner() {
+      scannerMode = "ar";
+
+      scannerPill.innerHTML = "✨ ARのQRコード";
+      scannerTitle.innerHTML =
+        "ARのQRコードを<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>ろう";
+      scannerNote.innerHTML =
+        "お<ruby>菓子<rt>かし</rt></ruby>をもらったら、スタッフが<ruby>案内<rt>あんない</rt></ruby>するARのQRコードをカメラに<ruby>写<rt>うつ</rt></ruby>してね。";
+
+      scannerModal.classList.add("show");
+      scannerModal.setAttribute("aria-hidden", "false");
+
+      if (!window.Html5Qrcode) {
+        alert("QR読み取りの準備ができませんでした。ネット接続を確認してください。");
+        closeScanner();
+        return;
+      }
+
+      if (scanning) {
+        return;
+      }
+
+      qrScanner = new Html5Qrcode("reader");
+      scanning = true;
+
+      qrScanner.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1
+        },
+        decodedText => {
+          processArQr(decodedText);
+        },
+        () => {}
+      ).catch(() => {
+        alert("カメラを起動できませんでした。HTTPSのURLで開き、カメラ許可をオンにしてください。");
+        closeScanner();
+      });
+    }
+
+    function processArQr(decodedText) {
+      const value = String(decodedText).trim();
+
+      let targetUrl;
+
+      try {
+        targetUrl = new URL(value);
+      } catch (error) {
+        alert("これはARサイトのQRコードではありません。スタッフに確認してね。");
+        return;
+      }
+
+      if (targetUrl.protocol !== "https:" && targetUrl.protocol !== "http:") {
+        alert("これはARサイトのQRコードではありません。スタッフに確認してね。");
+        return;
+      }
+
+      closeScanner(() => {
+        window.location.href = targetUrl.href;
       });
     }
 
@@ -1592,96 +1477,12 @@ function renderPlayerSelect() {
       renderStaffPanel();
     }
 
-    function renderCertificateForm() {
-      setScreen(`
-        <div class="pill">🏆 <ruby>認定証<rt>にんていしょう</rt></ruby>づくり</div>
-
-        <h1>
-          <ruby>探検隊<rt>たんけんたい</rt></ruby>の<ruby>
-    名前<rt>なまえ</rt></ruby>
-       を
-          <br>
-          <ruby>入<rt>い</rt></ruby>れよう
-        </h1>
-
-        <div class="hero-icon" style="text-align:center">✍️</div>
-
-        <div class="glass">
-          <p><ruby>名前<rt>なまえ</rt></ruby>を<ruby>入力<rt>にゅうりょく</rt></ruby>すると、きみだけの<ruby>認定証<rt>にんていしょう</rt></ruby>が<ruby>完成<rt>かんせい</rt></ruby>するよ。</p>
-        </div>
-
-        <input
-          id="nameInput"
-          class="name-input"
-          maxlength="12"
-          placeholder="なまえ"
-          value="${escapeHtml(playerName)}"
-        >
-
-        <button class="primary" type="button" onclick="createCertificate()">
-          <ruby>認定証<rt>にんていしょう</rt></ruby>を<ruby>表示<rt>ひょうじ</rt></ruby>
-        </button>
-
-        <button class="ghost" type="button" onclick="renderMissionHub()">
-          <ruby>戻<rt>もど</rt></ruby>る
-        </button>
-      `);
-    }
-
-    function createCertificate() {
-      const input = document.getElementById("nameInput");
-
-      playerName = input.value.trim() || "探検隊";
-      save();
-      renderCertificate();
-    }
-
-    function renderCertificate() {
-      setScreen(`
-        <div class="pill">🌿 ワクワクIT<ruby>探検隊<rt>たんけんたい</rt></ruby></div>
-        <h1><ruby>探検認定証<rt>たんけんにんていしょう</rt></ruby></h1>
-
-        <div class="certificate">
-          <div class="cert-label">MISSION COMPLETE</div>
-          <div class="cert-title">IT<ruby>探検隊認定証<rt>たんけんたいにんていしょう</rt></ruby></div>
-
-          <p style="position:relative;z-index:1">
-            あなたは3つのミッションをクリアし、
-            <br>
-            3つの<ruby>冒険<rt>ぼうけん</rt></ruby>をすべてクリアしました。
-          </p>
-
-          <div class="cert-name">${displayPlayerName()}</div>
-
-          <p style="position:relative;z-index:1">
-            すばらしい<ruby>勇気<rt>ゆうき</rt></ruby>とチャレンジする力を
-            <br>
-            ここに<ruby>認定<rt>にんてい</rt></ruby>します。
-          </p>
-
-          <p style="position:relative;z-index:1;font-size:36px;margin-top:12px">
-            🌪️ 💧 🔥
-          </p>
-
-          <div class="stamp"><ruby>認定<rt>にんてい</rt></ruby></div>
-        </div>
-
-        <button class="primary" type="button" onclick="renderClear()">
-          クリア<ruby>画面<rt>がめん</rt></ruby>へ
-        </button>
-
-        <button class="secondary" type="button" onclick="renderCertificateForm()">
-          <ruby>名前<rt>なまえ</rt></ruby>を<ruby>変更<rt>へんこう</rt></ruby>
-        </button>
-      `);
-    }
-
-    function renderClear() {
-      const colors = ["#facc15", "#22c55e", "#38bdf8", "#fb923c", "#f472b6"];
-
+    function renderRewardScreen() {
       setScreen(`
         <div class="confetti">
           ${Array.from({ length: 28 }).map((_, index) => {
+            const colors = ["#facc15", "#22c55e", "#38bdf8", "#fb923c", "#f472b6"];
+
             return `
               <span style="
                 left:${Math.random() * 100}%;
@@ -1693,27 +1494,49 @@ function renderPlayerSelect() {
         </div>
 
         <div class="hero">
-          <div class="pill">🎉 ミッション<ruby>完了<rt>かんりょう</rt></ruby> 🎉</div>
-          <h1>ゲーム<br>クリア！</h1>
-          <div class="hero-icon">🏆</div>
+          <div class="pill">
+            🎉 3つの<ruby>冒険<rt>ぼうけん</rt></ruby>クリア！ 🎉
+          </div>
+
+          <h1>
+            スタッフに
+            <br>
+            この<ruby>画面<rt>がめん</rt></ruby>を<ruby>見<rt>み</rt></ruby>せてね！
+          </h1>
+
+          <div class="hero-icon">🍬🎁✨</div>
 
           <div class="glass">
-            <h2>${displayPlayerName()}</h2>
-            <p>3つの<ruby>冒険<rt>ぼうけん</rt></ruby>をすべてクリアしたぞ！</p>
+            <h2>
+              ${playerCount}<ruby>人<rt>にん</rt></ruby>で
+              <ruby>冒険成功<rt>ぼうけんせいこう</rt></ruby>！
+            </h2>
 
-            <p style="margin-top:10px">
+            <p>
+              3つの<ruby>冒険<rt>ぼうけん</rt></ruby>を
+              すべてクリアしたよ！
+            </p>
+
+            <p style="margin-top:12px">
               <strong>
-                お<ruby>菓子<rt>かし</rt></ruby>をもらって、<ruby>最後<rt>さいご</rt></ruby>に<ruby>自分<rt>じぶん</rt></ruby>のうちわを<ruby>見<rt>み</rt></ruby>にいこう！
+                この<ruby>画面<rt>がめん</rt></ruby>をスタッフに<ruby>見<rt>み</rt></ruby>せると、
+                お<ruby>菓子<rt>かし</rt></ruby>がもらえるよ！
               </strong>
             </p>
           </div>
 
-          <button class="primary" type="button" onclick="renderStart()">
-            トップに<ruby>戻<rt>もど</rt></ruby>る
+          <div class="next-box">
+            お<ruby>菓子<rt>かし</rt></ruby>をもらったら、<br>
+            下のボタンを<ruby>押<rt>お</rt></ruby>して
+            ARのQRコードを<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>ろう！
+          </div>
+
+          <button class="primary" type="button" onclick="openArScanner()">
+            📷 ARのQRコードを<ruby>読<rt>よ</rt></ruby>む
           </button>
 
-          <button class="ghost" type="button" onclick="resetGame()">
-            <ruby>最初<rt>さいしょ</rt></ruby>からやり<ruby>直<rt>なお</rt></ruby>す
+          <button class="ghost" type="button" onclick="renderStart()">
+            トップに<ruby>戻<rt>もど</rt></ruby>る
           </button>
         </div>
       `);
@@ -1721,10 +1544,11 @@ function renderPlayerSelect() {
 
     function resetGame() {
       completed = [];
-      playerName = "";
+      playerCount = 1;
+      scannerMode = "mission";
 
       localStorage.removeItem(STORAGE_PROGRESS);
-      localStorage.removeItem(STORAGE_NAME);
+      localStorage.removeItem(STORAGE_PLAYER_COUNT);
 
       closeStaffLogin();
 
@@ -1738,14 +1562,7 @@ function renderPlayerSelect() {
       renderStart();
     }
 
-    if (
-  PLAYER_ID &&
-  ["1", "2", "3", "4"].includes(PLAYER_ID)
-) {
-  renderStart();
-} else {
-  renderPlayerSelect();
-}
+    renderStart();
   </script>
 </body>
 </html>
