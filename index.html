@@ -913,18 +913,69 @@
       return "session-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
     }
 
-    function logGameStart() {
+    function sendLog(eventName, detail = "") {
       if (
         !START_LOG_URL ||
         START_LOG_URL.includes("PASTE_YOUR_APPS_SCRIPT")
       ) {
-        console.warn("開始ログURLが未設定です。");
+        console.warn("ログ送信URLが未設定です。");
         return;
       }
 
-      // 入口QR（?start=1）から開いた時だけ、新しい参加セッションを作成
+      if (!sessionId) {
+        sessionId = localStorage.getItem(STORAGE_SESSION_ID) || "";
+      }
+
+      if (!sessionId && eventName !== "GAME_START") {
+        console.warn("SessionIDがないためログを送信できません:", eventName);
+        return;
+      }
+
+      const now = new Date();
+
+      const localDate = now.toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      });
+
+      const localTime = now.toLocaleTimeString("ja-JP", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+
+      const query = new URLSearchParams({
+        event: "analytics",
+        action: eventName,
+        detail: String(detail ?? ""),
+        sessionId: sessionId,
+        date: localDate,
+        time: localTime,
+        iso: now.toISOString(),
+        nonce: String(Date.now()),
+        cache: String(Math.random())
+      });
+
+      // イベントごとに別iframeを作るので、連続送信でも前の通信を上書きしない。
+      const frame = document.createElement("iframe");
+      frame.style.display = "none";
+      frame.setAttribute("aria-hidden", "true");
+      frame.src = START_LOG_URL + "?" + query.toString();
+
+      document.body.appendChild(frame);
+
+      setTimeout(() => {
+        frame.remove();
+      }, 6000);
+
+      console.log("ログ送信:", eventName, detail, sessionId);
+    }
+
+    function logGameStart() {
       const params = new URLSearchParams(window.location.search);
 
+      // 最初の入口QR（?start=1）から開いたときだけ新しいSessionIDを作る。
       if (params.get("start") !== "1") {
         return;
       }
@@ -933,90 +984,7 @@
       localStorage.setItem(STORAGE_SESSION_ID, sessionId);
       localStorage.removeItem(STORAGE_AR_RETURN_PENDING);
 
-      const now = new Date();
-
-      const localDate = now.toLocaleDateString("ja-JP", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-      });
-
-      const localTime = now.toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-      });
-
-      const query = new URLSearchParams({
-        event: "game_start",
-        sessionId: sessionId,
-        date: localDate,
-        time: localTime,
-        iso: now.toISOString(),
-        nonce: String(Date.now()),
-        cache: String(Math.random())
-      });
-
-      const frame = document.getElementById("startLogFrame");
-      frame.src = START_LOG_URL + "?" + query.toString();
-
-      console.log("入場ログを送信しました。", sessionId);
-    }
-
-    function logGameExit() {
-      if (
-        !START_LOG_URL ||
-        START_LOG_URL.includes("PASTE_YOUR_APPS_SCRIPT")
-      ) {
-        console.warn("退出ログURLが未設定です。");
-        return;
-      }
-
-      if (!sessionId) {
-        sessionId = localStorage.getItem(STORAGE_SESSION_ID) || "";
-      }
-
-      if (!sessionId) {
-        console.warn("退出ログ用のSessionIDがありません。");
-        return;
-      }
-
-      const now = new Date();
-
-      const localDate = now.toLocaleDateString("ja-JP", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-      });
-
-      const localTime = now.toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-      });
-
-      const query = new URLSearchParams({
-        event: "exit",
-        sessionId: sessionId,
-
-        // 新しいApps Script用
-        exitDate: localDate,
-        exitTime: localTime,
-        exitIso: now.toISOString(),
-
-        // 旧Apps Scriptでも受け取りやすいように残す
-        date: localDate,
-        time: localTime,
-        iso: now.toISOString(),
-
-        nonce: String(Date.now()),
-        cache: String(Math.random())
-      });
-
-      const frame = document.getElementById("startLogFrame");
-      frame.src = START_LOG_URL + "?" + query.toString();
-
-      console.log("退出ログを送信しました。", sessionId);
+      sendLog("GAME_START", "入口QR");
     }
 
     function loadProgress() {
@@ -1126,6 +1094,7 @@
 
     function confirmPlayerCount() {
       localStorage.setItem(STORAGE_PLAYER_COUNT, String(playerCount));
+      sendLog("PLAYER_COUNT", String(playerCount));
       renderOpening();
     }
 
@@ -1162,12 +1131,17 @@
         </p>
       </div>
 
-      <button class="primary" type="button" onclick="renderMissionHub()">
+      <button class="primary" type="button" onclick="startThreeMissions()">
         3つの<ruby>冒険<rt>ぼうけん</rt></ruby>へ！
       </button>
     </div>
   `);
 }
+
+    function startThreeMissions() {
+      sendLog("MISSION_START", "3つの冒険へ");
+      renderMissionHub();
+    }
 
     function renderMissionHub() {
       const complete = completed.length === missions.length;
@@ -1441,11 +1415,11 @@
         return;
       }
 
-      closeScanner(() => {
-        // ARから戻った時に退出QR画面を表示するための印
-        localStorage.setItem(STORAGE_AR_RETURN_PENDING, "1");
+      // ARのQRを正常に読み取ったタイミング
+      sendLog("AR_QR", "ARサイト");
 
-        // QRに入っているARサイトへ移動
+      closeScanner(() => {
+        localStorage.setItem(STORAGE_AR_RETURN_PENDING, "1");
         window.location.href = targetUrl.href;
       });
     }
@@ -1529,8 +1503,10 @@
         return;
       }
 
+      // 帰りのQRを正常に読み取ったタイミング
+      sendLog("EXIT_QR", "EXIT");
+
       closeScanner(() => {
-        logGameExit();
         localStorage.removeItem(STORAGE_AR_RETURN_PENDING);
         renderThanks();
       });
@@ -1554,22 +1530,13 @@
 
         <div class="hero">
           <div class="pill">🎉 <ruby>冒険完了<rt>ぼうけんかんりょう</rt></ruby>！ 🎉</div>
-
           <h1>ありがとう！</h1>
-
           <div class="hero-icon">🌴🏆✨</div>
 
           <div class="glass">
             <p>
               ワクワク！IT<ruby>探検隊<rt>たんけんたい</rt></ruby>に
               <ruby>参加<rt>さんか</rt></ruby>してくれてありがとう！
-            </p>
-
-            <p style="margin-top:12px">
-              <strong>
-                <ruby>退出<rt>たいしゅつ</rt></ruby>の<ruby>記録<rt>きろく</rt></ruby>も
-                <ruby>完了<rt>かんりょう</rt></ruby>したよ！
-              </strong>
             </p>
           </div>
 
@@ -1618,6 +1585,8 @@
         alert("このミッションはすでにクリアしています。");
         return;
       }
+
+      sendLog("MISSION_QR", mission.id);
 
       completed.push(mission.id);
       save();
@@ -1745,6 +1714,7 @@
     }
 
     function renderRewardScreen() {
+      sendLog("STAFF_SCREEN", "お菓子受取確認画面");
       setScreen(`
         <div class="confetti">
           ${Array.from({ length: 28 }).map((_, index) => {
