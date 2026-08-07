@@ -844,9 +844,8 @@
     const STAFF_PASSWORD = "2026";
 
     // Google Apps Script のウェブアプリURL（末尾 /exec）をここに貼り付けます。
-    const START_LOG_URL = "https://script.google.com/macros/s/AKfycbyEBIH3nsSzzEjhjr5KrN4zjkKEp_VVgvMRKglSbVCGTOWbQpRyO5F_4yNr5bMmXqkAWw/exec";
+    const START_LOG_URL = "PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE";
 
-    
 
    const missions = [
   {
@@ -904,6 +903,7 @@
     const scannerNote = document.getElementById("scannerNote");
 
     function logGameStart() {
+      // Apps Script URL未設定なら何もしない
       if (
         !START_LOG_URL ||
         START_LOG_URL.includes("PASTE_YOUR_APPS_SCRIPT")
@@ -912,8 +912,9 @@
         return;
       }
 
-      // QR入口から来た場合だけ記録。
+      // 入口QR（?start=1）から開いたときだけ記録
       const params = new URLSearchParams(window.location.search);
+
       if (params.get("start") !== "1") {
         return;
       }
@@ -937,13 +938,16 @@
         date: localDate,
         time: localTime,
         iso: now.toISOString(),
-        nonce: String(nowMs)
+        nonce: String(Date.now()),
+        cache: String(Math.random())
       });
 
-      // iframeへのGETなのでCORSの影響を受けにくい。
+      // 非表示iframeへ毎回違うURLを読み込ませてGET送信。
+      // 15秒制限・localStorage制限なし。
       const frame = document.getElementById("startLogFrame");
       frame.src = START_LOG_URL + "?" + query.toString();
 
+      console.log("開始ログを送信しました。");
     }
 
     function loadProgress() {
