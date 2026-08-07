@@ -829,6 +829,14 @@
     </div>
   </div>
 
+  <!-- Googleフォームへ画面遷移せず開始ログを送るための非表示フレーム -->
+  <iframe
+    id="googleFormLogFrame"
+    name="googleFormLogFrame"
+    title="開始ログ送信用"
+    style="display:none"
+  ></iframe>
+
   <script>
     "use strict";
 
@@ -836,9 +844,10 @@
     const STORAGE_PLAYER_COUNT = "wakuwaku_player_count_v1";
     const STAFF_PASSWORD = "2026";
 
-    // Google Apps Script のウェブアプリURLをここに貼り付けてください。
-    const START_LOG_URL = "https://script.google.com/macros/s/AKfycbzomGUrL_C_qM3YdNooVuTBUq075VDD883jAHsImI32jUohGoMpR10ol0kS4CM5tMxC/exec";
-    const START_LOG_SESSION_KEY = "wakuwaku_start_logged_v1";
+    // Googleフォームで「事前入力したリンクを取得」したURLをここに貼り付けてください。
+    // 例:
+    // https://docs.google.com/forms/d/e/XXXXXXXX/viewform?usp=pp_url&entry.123456789=START
+    const GOOGLE_FORM_PREFILLED_URL = "PASTE_GOOGLE_FORM_PREFILLED_URL_HERE";
 
    const missions = [
   {
@@ -895,44 +904,69 @@
     const scannerTitle = document.getElementById("scannerTitle");
     const scannerNote = document.getElementById("scannerNote");
 
-  function logGameStart() {
+    function logGameStartToGoogleForm() {
+      // 入口QRには ?start=1 を付けます。
+      // 普通にサイトを開いた場合はログを残しません。
+      const params = new URLSearchParams(window.location.search);
 
-  if (sessionStorage.getItem(START_LOG_SESSION_KEY) === "1") {
-    return;
-  }
+      if (params.get("start") !== "1") {
+        return;
+      }
 
-  if (!START_LOG_URL || START_LOG_URL.includes("PASTE_GOOGLE")) {
-    console.warn("開始ログURLが未設定です");
-    return;
-  }
+      // ブラウザの更新ボタンによる二重記録を防止。
+      const navigation = performance.getEntriesByType("navigation")[0];
 
-  const now = new Date();
+      if (navigation && navigation.type === "reload") {
+        return;
+      }
 
-  const url =
-    START_LOG_URL +
-    "?event=start" +
-    "&time=" +
-    encodeURIComponent(
-      now.toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-      })
-    );
+      if (
+        !GOOGLE_FORM_PREFILLED_URL ||
+        GOOGLE_FORM_PREFILLED_URL.includes("PASTE_GOOGLE_FORM")
+      ) {
+        console.warn("Googleフォームの事前入力URLが未設定です。");
+        return;
+      }
 
-  fetch(url, {
-    method: "GET",
-    mode: "no-cors"
-  });
+      try {
+        const prefilledUrl = new URL(GOOGLE_FORM_PREFILLED_URL);
 
-  sessionStorage.setItem(
-    START_LOG_SESSION_KEY,
-    "1"
-  );
+        const entry = [...prefilledUrl.searchParams.entries()]
+          .find(([key]) => key.startsWith("entry."));
 
-}
-  
+        if (!entry) {
+          console.warn("Googleフォームの entry ID が見つかりません。");
+          return;
+        }
 
+        const [entryId, entryValue] = entry;
+
+        // viewform → formResponse に変換。
+        const actionUrl = prefilledUrl.origin +
+          prefilledUrl.pathname.replace(/\/viewform$/, "/formResponse");
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = actionUrl;
+        form.target = "googleFormLogFrame";
+        form.style.display = "none";
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = entryId;
+        input.value = entryValue || "START";
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+
+        setTimeout(() => {
+          form.remove();
+        }, 1000);
+      } catch (error) {
+        console.warn("Googleフォームへの開始ログ送信に失敗しました:", error);
+      }
+    }
 
     function loadProgress() {
       try {
@@ -1605,7 +1639,7 @@
       renderStart();
     }
 
-    logGameStart();
+    logGameStartToGoogleForm();
     renderStart();
   </script>
 </body>
