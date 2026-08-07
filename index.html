@@ -844,7 +844,8 @@
     const STAFF_PASSWORD = "2026";
     const STORAGE_SESSION_ID = "wakunatsu_session_id";
     const STORAGE_AR_RETURN_PENDING = "wakunatsu_ar_return_pending_v1";
-const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
+    const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
+    const STORAGE_LOG_QUEUE = "wakunatsu_log_queue_v1";
 
     // Google Apps Script のウェブアプリURL（末尾 /exec）をここに貼り付けます。
     const START_LOG_URL = "https://script.google.com/macros/s/AKfycbyEBIH3nsSzzEjhjr5KrN4zjkKEp_VVgvMRKglSbVCGTOWbQpRyO5F_4yNr5bMmXqkAWw/exec";
@@ -922,6 +923,27 @@ const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
       return "event-" + Date.now() + "-" + Math.random().toString(36).slice(2, 12);
     }
 
+    function loadLogQueue() {
+      try {
+        const raw = localStorage.getItem(STORAGE_LOG_QUEUE);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveLogQueue(queue) {
+      try {
+        localStorage.setItem(STORAGE_LOG_QUEUE, JSON.stringify(queue));
+      } catch (error) {
+        console.warn("ログキューを保存できませんでした。", error);
+      }
+    }
+
+    let logQueueTimer = null;
+    let processingLogQueue = false;
+
     function sendLog(eventName, detail = "") {
       if (
         !START_LOG_URL ||
@@ -941,7 +963,6 @@ const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
       }
 
       const now = new Date();
-      const eventId = createEventId();
 
       const localDate = now.toLocaleDateString("ja-JP", {
         year: "numeric",
@@ -955,69 +976,132 @@ const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
         second: "2-digit"
       });
 
-      const baseParams = {
-        event: "analytics",
-        eventId: eventId,
+      const item = {
+        eventId: createEventId(),
         action: eventName,
         detail: String(detail ?? ""),
         sessionId: sessionId,
         date: localDate,
         time: localTime,
-        iso: now.toISOString()
+        iso: now.toISOString(),
+        attempt: 0,
+        nextAttemptAt: Date.now() + Math.floor(Math.random() * 350)
       };
 
-      /*
-        50台前後が同時にアクセスしても取りこぼしにくいように、
-        同じeventIdを使って最大4回再送します。
-        Apps Script側でeventIdを重複排除するので、同じログが4行にはなりません。
+      const queue = loadLogQueue();
+      queue.push(item);
 
-        0回目: ほぼ即時
-        1回目: 4〜9秒後
-        2回目: 12〜20秒後
-        3回目: 25〜40秒後
-      */
-      const retryWindows = [
-        [80, 450],
-        [4000, 9000],
-        [12000, 20000],
-        [25000, 40000]
-      ];
+      // 古すぎる送信待ちデータは捨てる
+      const cutoff = Date.now() - (24 * 60 * 60 * 1000);
+      saveLogQueue(
+        queue.filter(log => {
+          const t = Date.parse(log.iso || "");
+          return !Number.isFinite(t) || t >= cutoff;
+        })
+      );
 
-      retryWindows.forEach(([minDelay, maxDelay], attempt) => {
-        const delay =
-          minDelay + Math.floor(Math.random() * (maxDelay - minDelay + 1));
+      processLogQueue();
+    }
 
-        setTimeout(() => {
+    function processLogQueue() {
+      if (processingLogQueue) return;
+
+      processingLogQueue = true;
+
+      try {
+        let queue = loadLogQueue();
+
+        if (queue.length === 0) {
+          return;
+        }
+
+        const now = Date.now();
+        let changed = false;
+
+        queue.forEach(item => {
+          if (item.attempt >= 4) return;
+          if (Number(item.nextAttemptAt || 0) > now) return;
+
           const query = new URLSearchParams({
-            ...baseParams,
-            attempt: String(attempt + 1),
+            event: "analytics",
+            eventId: item.eventId,
+            action: item.action,
+            detail: item.detail,
+            sessionId: item.sessionId,
+            date: item.date,
+            time: item.time,
+            iso: item.iso,
+            attempt: String(item.attempt + 1),
             nonce: String(Date.now()),
             cache: String(Math.random())
           });
 
-          // iframeを別々に作ることで、連続ログでも前の通信を上書きしない。
           const frame = document.createElement("iframe");
           frame.style.display = "none";
           frame.setAttribute("aria-hidden", "true");
           frame.src = START_LOG_URL + "?" + query.toString();
-
           document.body.appendChild(frame);
 
-          // サーバー側で待機しても途中で消さないよう長めに保持。
           setTimeout(() => {
             frame.remove();
           }, 90000);
 
+          item.attempt += 1;
+
+          // 50台程度の同時アクセスをばらけさせる
+          const retryWindows = [
+            [4000, 9000],
+            [12000, 20000],
+            [25000, 40000]
+          ];
+
+          if (item.attempt < 4) {
+            const [minDelay, maxDelay] = retryWindows[item.attempt - 1];
+            item.nextAttemptAt =
+              Date.now() +
+              minDelay +
+              Math.floor(Math.random() * (maxDelay - minDelay + 1));
+          }
+
+          changed = true;
+
           console.log(
             "ログ送信:",
-            eventName,
-            detail,
-            sessionId,
-            "attempt=" + (attempt + 1),
-            "eventId=" + eventId
+            item.action,
+            item.detail,
+            item.sessionId,
+            "attempt=" + item.attempt,
+            "eventId=" + item.eventId
           );
-        }, delay);
-      });
+        });
+
+        // 4回送信したものはキューから除外
+        queue = queue.filter(item => item.attempt < 4);
+
+        if (changed) {
+          saveLogQueue(queue);
+        }
+
+        if (logQueueTimer) {
+          clearTimeout(logQueueTimer);
+          logQueueTimer = null;
+        }
+
+        if (queue.length > 0) {
+          const nextTime = Math.min(
+            ...queue.map(item => Number(item.nextAttemptAt || Date.now() + 1000))
+          );
+
+          const wait = Math.max(500, nextTime - Date.now());
+
+          logQueueTimer = setTimeout(() => {
+            processLogQueue();
+          }, wait);
+        }
+
+      } finally {
+        processingLogQueue = false;
+      }
     }
 
     function logGameStart() {
@@ -1031,6 +1115,7 @@ const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
       sessionId = createSessionId();
       localStorage.setItem(STORAGE_SESSION_ID, sessionId);
       localStorage.removeItem(STORAGE_AR_RETURN_PENDING);
+      localStorage.removeItem(STORAGE_AR_URL);
 
       sendLog("GAME_START", "入口QR");
     }
@@ -1466,24 +1551,15 @@ const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
       // ARのQRを正常に読み取ったタイミング
       sendLog("AR_QR", "ARサイト");
 
-     closeScanner(() => {
+      closeScanner(() => {
+        localStorage.setItem(STORAGE_AR_URL, targetUrl.href);
+        localStorage.setItem(STORAGE_AR_RETURN_PENDING, "1");
 
-  // ARサイトのURLを保存
-  localStorage.setItem(
-    STORAGE_AR_URL,
-    targetUrl.href
-  );
+        // ARへ移動する直前にも送信キューを処理
+        processLogQueue();
 
-  // ARから戻った時に退出画面を表示
-  localStorage.setItem(
-    STORAGE_AR_RETURN_PENDING,
-    "1"
-  );
-
-  // ARサイトへ移動
-  window.location.href = targetUrl.href;
-
-});
+        window.location.href = targetUrl.href;
+      });
     }
 
     function renderExitQrScreen() {
@@ -1507,9 +1583,10 @@ const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
               <ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>ってね！
             </p>
           </div>
+
           <button class="secondary" type="button" onclick="returnToAr()">
-  ✨ ARに<ruby>戻<rt>もど</rt></ruby>る
-</button>
+            ✨ ARに<ruby>戻<rt>もど</rt></ruby>る
+          </button>
 
           <button class="primary" type="button" onclick="openExitScanner()">
             📷 <ruby>退出<rt>たいしゅつ</rt></ruby>QRを<ruby>読<rt>よ</rt></ruby>む
@@ -1519,26 +1596,17 @@ const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
     }
 
     function returnToAr() {
+      const arUrl = localStorage.getItem(STORAGE_AR_URL);
 
-  const arUrl =
-    localStorage.getItem(STORAGE_AR_URL);
+      if (!arUrl) {
+        alert("ARのURLが見つかりません。スタッフに確認してね。");
+        return;
+      }
 
-  if (!arUrl) {
-    alert(
-      "ARのURLが見つかりません。スタッフに確認してね。"
-    );
-    return;
-  }
-
-  // また戻ってきた時も退出画面を表示する
-  localStorage.setItem(
-    STORAGE_AR_RETURN_PENDING,
-    "1"
-  );
-
-  // ARへ戻る
-  window.location.href = arUrl;
-}
+      localStorage.setItem(STORAGE_AR_RETURN_PENDING, "1");
+      processLogQueue();
+      window.location.href = arUrl;
+    }
 
     function openExitScanner() {
       scannerMode = "exit";
@@ -1876,7 +1944,7 @@ const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
       localStorage.removeItem(STORAGE_PLAYER_COUNT);
       localStorage.removeItem(STORAGE_SESSION_ID);
       localStorage.removeItem(STORAGE_AR_RETURN_PENDING);
-localStorage.removeItem(STORAGE_AR_URL);
+      localStorage.removeItem(STORAGE_AR_URL);
 
       closeStaffLogin();
 
@@ -1890,16 +1958,25 @@ localStorage.removeItem(STORAGE_AR_URL);
       renderStart();
     }
 
+    processLogQueue();
     logGameStart();
     renderStart();
 
     window.addEventListener("pageshow", () => {
+      processLogQueue();
+
       const shouldShowExit =
         localStorage.getItem(STORAGE_AR_RETURN_PENDING) === "1";
 
       if (shouldShowExit) {
         sessionId = localStorage.getItem(STORAGE_SESSION_ID) || sessionId;
         renderExitQrScreen();
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        processLogQueue();
       }
     });
   </script>
