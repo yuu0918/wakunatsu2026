@@ -913,6 +913,14 @@
       return "session-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
     }
 
+    function createEventId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+      }
+
+      return "event-" + Date.now() + "-" + Math.random().toString(36).slice(2, 12);
+    }
+
     function sendLog(eventName, detail = "") {
       if (
         !START_LOG_URL ||
@@ -932,6 +940,7 @@
       }
 
       const now = new Date();
+      const eventId = createEventId();
 
       const localDate = now.toLocaleDateString("ja-JP", {
         year: "numeric",
@@ -945,31 +954,69 @@
         second: "2-digit"
       });
 
-      const query = new URLSearchParams({
+      const baseParams = {
         event: "analytics",
+        eventId: eventId,
         action: eventName,
         detail: String(detail ?? ""),
         sessionId: sessionId,
         date: localDate,
         time: localTime,
-        iso: now.toISOString(),
-        nonce: String(Date.now()),
-        cache: String(Math.random())
+        iso: now.toISOString()
+      };
+
+      /*
+        50台前後が同時にアクセスしても取りこぼしにくいように、
+        同じeventIdを使って最大4回再送します。
+        Apps Script側でeventIdを重複排除するので、同じログが4行にはなりません。
+
+        0回目: ほぼ即時
+        1回目: 4〜9秒後
+        2回目: 12〜20秒後
+        3回目: 25〜40秒後
+      */
+      const retryWindows = [
+        [80, 450],
+        [4000, 9000],
+        [12000, 20000],
+        [25000, 40000]
+      ];
+
+      retryWindows.forEach(([minDelay, maxDelay], attempt) => {
+        const delay =
+          minDelay + Math.floor(Math.random() * (maxDelay - minDelay + 1));
+
+        setTimeout(() => {
+          const query = new URLSearchParams({
+            ...baseParams,
+            attempt: String(attempt + 1),
+            nonce: String(Date.now()),
+            cache: String(Math.random())
+          });
+
+          // iframeを別々に作ることで、連続ログでも前の通信を上書きしない。
+          const frame = document.createElement("iframe");
+          frame.style.display = "none";
+          frame.setAttribute("aria-hidden", "true");
+          frame.src = START_LOG_URL + "?" + query.toString();
+
+          document.body.appendChild(frame);
+
+          // サーバー側で待機しても途中で消さないよう長めに保持。
+          setTimeout(() => {
+            frame.remove();
+          }, 90000);
+
+          console.log(
+            "ログ送信:",
+            eventName,
+            detail,
+            sessionId,
+            "attempt=" + (attempt + 1),
+            "eventId=" + eventId
+          );
+        }, delay);
       });
-
-      // イベントごとに別iframeを作るので、連続送信でも前の通信を上書きしない。
-      const frame = document.createElement("iframe");
-      frame.style.display = "none";
-      frame.setAttribute("aria-hidden", "true");
-      frame.src = START_LOG_URL + "?" + query.toString();
-
-      document.body.appendChild(frame);
-
-      setTimeout(() => {
-        frame.remove();
-      }, 6000);
-
-      console.log("ログ送信:", eventName, detail, sessionId);
     }
 
     function logGameStart() {
