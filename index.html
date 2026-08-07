@@ -841,12 +841,11 @@
 
     const STORAGE_PROGRESS = "wakuwaku_final_progress_v1";
     const STORAGE_PLAYER_COUNT = "wakuwaku_player_count_v1";
-    const STORAGE_SESSION_ID = "wakunatsu_session_id_v1";
-    const STORAGE_AR_RETURN_PENDING = "wakunatsu_ar_return_pending_v1";
     const STAFF_PASSWORD = "2026";
+    const STORAGE_SESSION_ID = "wakunatsu_session_id";
 
     // Google Apps Script のウェブアプリURL（末尾 /exec）をここに貼り付けます。
-    const START_LOG_URL = "PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE";
+    const START_LOG_URL = "https://script.google.com/macros/s/AKfycbyEBIH3nsSzzEjhjr5KrN4zjkKEp_VVgvMRKglSbVCGTOWbQpRyO5F_4yNr5bMmXqkAWw/exec";
 
 
    const missions = [
@@ -892,8 +891,19 @@
 ];
 
     let completed = loadProgress();
+    let sessionId =
+  localStorage.getItem(STORAGE_SESSION_ID);
+
+if (!sessionId) {
+  sessionId =
+    crypto.randomUUID();
+
+  localStorage.setItem(
+    STORAGE_SESSION_ID,
+    sessionId
+  );
+}
     let playerCount = Number(localStorage.getItem(STORAGE_PLAYER_COUNT)) || 1;
-    let sessionId = localStorage.getItem(STORAGE_SESSION_ID) || "";
     let qrScanner = null;
     let scanning = false;
     let scannerMode = "mission";
@@ -905,15 +915,42 @@
     const scannerTitle = document.getElementById("scannerTitle");
     const scannerNote = document.getElementById("scannerNote");
 
-    function createSessionId() {
-      if (window.crypto && typeof window.crypto.randomUUID === "function") {
-        return window.crypto.randomUUID();
-      }
-
-      return "session-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
-    }
-
     function logGameStart() {
+      function logGameExit() {
+
+  const now = new Date();
+
+  const localDate =
+    now.toLocaleDateString("ja-JP");
+
+  const localTime =
+    now.toLocaleTimeString("ja-JP");
+
+  const query =
+    new URLSearchParams({
+
+      event:"exit",
+
+      sessionId:sessionId,
+
+      date:localDate,
+
+      time:localTime,
+
+      iso:now.toISOString()
+
+    });
+
+  const frame =
+    document.getElementById("startLogFrame");
+
+  frame.src =
+    START_LOG_URL +
+    "?" +
+    query.toString();
+
+}
+      // Apps Script URL未設定なら何もしない
       if (
         !START_LOG_URL ||
         START_LOG_URL.includes("PASTE_YOUR_APPS_SCRIPT")
@@ -922,16 +959,12 @@
         return;
       }
 
+      // 入口QR（?start=1）から開いたときだけ記録
       const params = new URLSearchParams(window.location.search);
 
-      // 入口QR（?start=1）から開いたときだけ、新しい参加セッションを作る。
       if (params.get("start") !== "1") {
         return;
       }
-
-      sessionId = createSessionId();
-      localStorage.setItem(STORAGE_SESSION_ID, sessionId);
-      localStorage.removeItem(STORAGE_AR_RETURN_PENDING);
 
       const now = new Date();
 
@@ -949,7 +982,6 @@
 
       const query = new URLSearchParams({
         event: "game_start",
-        sessionId: sessionId,
         date: localDate,
         time: localTime,
         iso: now.toISOString(),
@@ -957,58 +989,12 @@
         cache: String(Math.random())
       });
 
+      // 非表示iframeへ毎回違うURLを読み込ませてGET送信。
+      // 15秒制限・localStorage制限なし。
       const frame = document.getElementById("startLogFrame");
       frame.src = START_LOG_URL + "?" + query.toString();
 
-      console.log("入場ログを送信しました。", sessionId);
-    }
-
-    function logGameExit() {
-      if (
-        !START_LOG_URL ||
-        START_LOG_URL.includes("PASTE_YOUR_APPS_SCRIPT")
-      ) {
-        console.warn("開始ログURLが未設定です。");
-        return;
-      }
-
-      if (!sessionId) {
-        sessionId = localStorage.getItem(STORAGE_SESSION_ID) || "";
-      }
-
-      if (!sessionId) {
-        console.warn("退出ログ用のセッションIDがありません。");
-        return;
-      }
-
-      const now = new Date();
-
-      const localDate = now.toLocaleDateString("ja-JP", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-      });
-
-      const localTime = now.toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-      });
-
-      const query = new URLSearchParams({
-        event: "exit",
-        sessionId: sessionId,
-        exitDate: localDate,
-        exitTime: localTime,
-        exitIso: now.toISOString(),
-        nonce: String(Date.now()),
-        cache: String(Math.random())
-      });
-
-      const frame = document.getElementById("startLogFrame");
-      frame.src = START_LOG_URL + "?" + query.toString();
-
-      console.log("退出ログを送信しました。", sessionId);
+      console.log("開始ログを送信しました。");
     }
 
     function loadProgress() {
@@ -1348,11 +1334,6 @@
           aspectRatio: 1
         },
         decodedText => {
-          if (scannerMode === "exit") {
-            processExitQr(decodedText);
-            return;
-          }
-
           if (scannerMode === "ar") {
             processArQr(decodedText);
             return;
@@ -1434,141 +1415,48 @@
       }
 
       closeScanner(() => {
-        localStorage.setItem(STORAGE_AR_RETURN_PENDING, "1");
-        window.location.href = targetUrl.href;
+        renderExitQr();
+        function renderExitQr(){
+
+  setScreen(`
+
+<div class="hero">
+
+<div class="pill">
+🚪 退出
+</div>
+
+<h1>
+
+最後のQRコードを
+読み取ろう！
+
+</h1>
+
+<div class="glass">
+
+ARを楽しんだら
+
+スタッフの
+退出QRを
+読み取ってね！
+
+</div>
+
+<button
+class="primary"
+onclick="openExitScanner()">
+
+退出QRを読む
+
+</button>
+
+</div>
+
+`);
+
+}
       });
-    }
-
-    function renderExitQrScreen() {
-      setScreen(`
-        <div class="hero">
-          <div class="pill">🚪 <ruby>退出確認<rt>たいしゅつかくにん</rt></ruby></div>
-
-          <h1>
-            <ruby>最後<rt>さいご</rt></ruby>のQRコードを
-            <br>
-            <ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>ろう！
-          </h1>
-
-          <div class="hero-icon">📷🚪✨</div>
-
-          <div class="glass">
-            <p>
-              ARを<ruby>楽<rt>たの</rt></ruby>しんだら、
-              スタッフが<ruby>案内<rt>あんない</rt></ruby>する
-              <ruby>退出用<rt>たいしゅつよう</rt></ruby>QRコードを
-              <ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>ってね！
-            </p>
-          </div>
-
-          <button class="primary" type="button" onclick="openExitScanner()">
-            📷 <ruby>退出<rt>たいしゅつ</rt></ruby>QRを<ruby>読<rt>よ</rt></ruby>む
-          </button>
-        </div>
-      `);
-    }
-
-    function openExitScanner() {
-      scannerMode = "exit";
-
-      scannerPill.innerHTML = "🚪 退出QR";
-      scannerTitle.innerHTML =
-        "<ruby>退出<rt>たいしゅつ</rt></ruby>QRコードを<ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>ろう";
-      scannerNote.innerHTML =
-        "スタッフが<ruby>案内<rt>あんない</rt></ruby>する<ruby>退出用<rt>たいしゅつよう</rt></ruby>QRコードをカメラに<ruby>写<rt>うつ</rt></ruby>してね。";
-
-      scannerModal.classList.add("show");
-      scannerModal.setAttribute("aria-hidden", "false");
-
-      if (!window.Html5Qrcode) {
-        alert("QR読み取りの準備ができませんでした。ネット接続を確認してください。");
-        closeScanner();
-        return;
-      }
-
-      if (scanning) {
-        return;
-      }
-
-      qrScanner = new Html5Qrcode("reader");
-      scanning = true;
-
-      qrScanner.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1
-        },
-        decodedText => {
-          processExitQr(decodedText);
-        },
-        () => {}
-      ).catch(() => {
-        alert("カメラを起動できませんでした。HTTPSのURLで開き、カメラ許可をオンにしてください。");
-        closeScanner();
-      });
-    }
-
-    function processExitQr(decodedText) {
-      const clean = String(decodedText).trim().toUpperCase();
-
-      if (clean !== "EXIT") {
-        alert("これは退出用QRコードではありません。スタッフに確認してね。");
-        return;
-      }
-
-      closeScanner(() => {
-        logGameExit();
-        localStorage.removeItem(STORAGE_AR_RETURN_PENDING);
-        renderThanks();
-      });
-    }
-
-    function renderThanks() {
-      setScreen(`
-        <div class="confetti">
-          ${Array.from({ length: 28 }).map((_, index) => {
-            const colors = ["#facc15", "#22c55e", "#38bdf8", "#fb923c", "#f472b6"];
-
-            return `
-              <span style="
-                left:${Math.random() * 100}%;
-                animation-delay:${Math.random() * 2}s;
-                background:${colors[index % colors.length]}
-              "></span>
-            `;
-          }).join("")}
-        </div>
-
-        <div class="hero">
-          <div class="pill">🎉 <ruby>冒険完了<rt>ぼうけんかんりょう</rt></ruby>！ 🎉</div>
-
-          <h1>
-            ありがとう！
-          </h1>
-
-          <div class="hero-icon">🌴🏆✨</div>
-
-          <div class="glass">
-            <p>
-              ワクワク！IT<ruby>探検隊<rt>たんけんたい</rt></ruby>に
-              <ruby>参加<rt>さんか</rt></ruby>してくれてありがとう！
-            </p>
-
-            <p style="margin-top:12px">
-              <strong>
-                <ruby>退出<rt>たいしゅつ</rt></ruby>の<ruby>記録<rt>きろく</rt></ruby>も
-                <ruby>完了<rt>かんりょう</rt></ruby>したよ！
-              </strong>
-            </p>
-          </div>
-
-          <button class="primary" type="button" onclick="resetGame()">
-            はじめに<ruby>戻<rt>もど</rt></ruby>る
-          </button>
-        </div>
-      `);
     }
 
     function closeScanner(callback) {
@@ -1803,13 +1691,10 @@
     function resetGame() {
       completed = [];
       playerCount = 1;
-      sessionId = "";
       scannerMode = "mission";
 
       localStorage.removeItem(STORAGE_PROGRESS);
       localStorage.removeItem(STORAGE_PLAYER_COUNT);
-      localStorage.removeItem(STORAGE_SESSION_ID);
-      localStorage.removeItem(STORAGE_AR_RETURN_PENDING);
 
       closeStaffLogin();
 
@@ -1825,16 +1710,6 @@
 
     logGameStart();
     renderStart();
-
-    window.addEventListener("pageshow", () => {
-      const shouldShowExit =
-        localStorage.getItem(STORAGE_AR_RETURN_PENDING) === "1";
-
-      if (shouldShowExit) {
-        sessionId = localStorage.getItem(STORAGE_SESSION_ID) || sessionId;
-        renderExitQrScreen();
-      }
-    });
   </script>
 </body>
 </html>
