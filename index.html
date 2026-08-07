@@ -846,9 +846,7 @@
     // Google Apps Script のウェブアプリURL（末尾 /exec）をここに貼り付けます。
     const START_LOG_URL = "https://script.google.com/macros/s/AKfycbyEBIH3nsSzzEjhjr5KrN4zjkKEp_VVgvMRKglSbVCGTOWbQpRyO5F_4yNr5bMmXqkAWw/exec";
 
-    // 更新ボタンなどによる連続二重記録を防ぐ時間（ミリ秒）
-    const START_LOG_COOLDOWN_MS = 15000;
-    const START_LOG_LAST_TIME_KEY = "wakuwaku_last_start_log_time_v2";
+    
 
    const missions = [
   {
@@ -920,14 +918,6 @@
         return;
       }
 
-      const nowMs = Date.now();
-      const lastMs = Number(localStorage.getItem(START_LOG_LAST_TIME_KEY) || "0");
-
-      // 更新や連打による二重記録だけ防止。
-      if (nowMs - lastMs < START_LOG_COOLDOWN_MS) {
-        return;
-      }
-
       const now = new Date();
 
       const localDate = now.toLocaleDateString("ja-JP", {
@@ -954,7 +944,6 @@
       const frame = document.getElementById("startLogFrame");
       frame.src = START_LOG_URL + "?" + query.toString();
 
-      localStorage.setItem(START_LOG_LAST_TIME_KEY, String(nowMs));
     }
 
     function loadProgress() {
