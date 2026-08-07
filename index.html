@@ -836,6 +836,10 @@
     const STORAGE_PLAYER_COUNT = "wakuwaku_player_count_v1";
     const STAFF_PASSWORD = "2026";
 
+    // Google Apps Script のウェブアプリURLをここに貼り付けてください。
+    const START_LOG_URL = "https://script.google.com/macros/s/AKfycbzomGUrL_C_qM3YdNooVuTBUq075VDD883jAHsImI32jUohGoMpR10ol0kS4CM5tMxC/exec";
+    const START_LOG_SESSION_KEY = "wakuwaku_start_logged_v1";
+
    const missions = [
   {
     id: "wind",
@@ -890,6 +894,48 @@
     const scannerPill = document.getElementById("scannerPill");
     const scannerTitle = document.getElementById("scannerTitle");
     const scannerNote = document.getElementById("scannerNote");
+
+    function logGameStart() {
+      // 同じタブでの再読み込みによる二重記録を防止。
+      if (sessionStorage.getItem(START_LOG_SESSION_KEY) === "1") {
+        return;
+      }
+
+      // URL未設定でもゲーム本体は通常どおり動作。
+      if (!START_LOG_URL || START_LOG_URL.includes("PASTE_GOOGLE_APPS_SCRIPT")) {
+        console.warn("開始ログURLが未設定です。");
+        return;
+      }
+
+      const now = new Date();
+
+      const payload = new URLSearchParams({
+        event: "game_start",
+        timestamp: now.toISOString(),
+        localTime: now.toLocaleTimeString("ja-JP", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        }),
+        userAgent: navigator.userAgent
+      });
+
+      fetch(START_LOG_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: payload.toString(),
+        keepalive: true
+      })
+      .then(() => {
+        sessionStorage.setItem(START_LOG_SESSION_KEY, "1");
+      })
+      .catch(error => {
+        console.warn("開始ログの送信に失敗しました:", error);
+      });
+    }
 
     function loadProgress() {
       try {
@@ -1562,6 +1608,7 @@
       renderStart();
     }
 
+    logGameStart();
     renderStart();
   </script>
 </body>
