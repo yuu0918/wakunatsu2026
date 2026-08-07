@@ -844,6 +844,7 @@
     const STAFF_PASSWORD = "2026";
     const STORAGE_SESSION_ID = "wakunatsu_session_id";
     const STORAGE_AR_RETURN_PENDING = "wakunatsu_ar_return_pending_v1";
+const STORAGE_AR_URL = "wakunatsu_ar_url_v1";
 
     // Google Apps Script のウェブアプリURL（末尾 /exec）をここに貼り付けます。
     const START_LOG_URL = "https://script.google.com/macros/s/AKfycbyEBIH3nsSzzEjhjr5KrN4zjkKEp_VVgvMRKglSbVCGTOWbQpRyO5F_4yNr5bMmXqkAWw/exec";
@@ -1465,10 +1466,24 @@
       // ARのQRを正常に読み取ったタイミング
       sendLog("AR_QR", "ARサイト");
 
-      closeScanner(() => {
-        localStorage.setItem(STORAGE_AR_RETURN_PENDING, "1");
-        window.location.href = targetUrl.href;
-      });
+     closeScanner(() => {
+
+  // ARサイトのURLを保存
+  localStorage.setItem(
+    STORAGE_AR_URL,
+    targetUrl.href
+  );
+
+  // ARから戻った時に退出画面を表示
+  localStorage.setItem(
+    STORAGE_AR_RETURN_PENDING,
+    "1"
+  );
+
+  // ARサイトへ移動
+  window.location.href = targetUrl.href;
+
+});
     }
 
     function renderExitQrScreen() {
@@ -1492,6 +1507,9 @@
               <ruby>読<rt>よ</rt></ruby>み<ruby>取<rt>と</rt></ruby>ってね！
             </p>
           </div>
+          <button class="secondary" type="button" onclick="returnToAr()">
+  ✨ ARに<ruby>戻<rt>もど</rt></ruby>る
+</button>
 
           <button class="primary" type="button" onclick="openExitScanner()">
             📷 <ruby>退出<rt>たいしゅつ</rt></ruby>QRを<ruby>読<rt>よ</rt></ruby>む
@@ -1499,6 +1517,28 @@
         </div>
       `);
     }
+
+    function returnToAr() {
+
+  const arUrl =
+    localStorage.getItem(STORAGE_AR_URL);
+
+  if (!arUrl) {
+    alert(
+      "ARのURLが見つかりません。スタッフに確認してね。"
+    );
+    return;
+  }
+
+  // また戻ってきた時も退出画面を表示する
+  localStorage.setItem(
+    STORAGE_AR_RETURN_PENDING,
+    "1"
+  );
+
+  // ARへ戻る
+  window.location.href = arUrl;
+}
 
     function openExitScanner() {
       scannerMode = "exit";
@@ -1836,6 +1876,7 @@
       localStorage.removeItem(STORAGE_PLAYER_COUNT);
       localStorage.removeItem(STORAGE_SESSION_ID);
       localStorage.removeItem(STORAGE_AR_RETURN_PENDING);
+localStorage.removeItem(STORAGE_AR_URL);
 
       closeStaffLogin();
 
