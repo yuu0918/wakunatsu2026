@@ -895,47 +895,44 @@
     const scannerTitle = document.getElementById("scannerTitle");
     const scannerNote = document.getElementById("scannerNote");
 
-    function logGameStart() {
-      // 同じタブでの再読み込みによる二重記録を防止。
-      if (sessionStorage.getItem(START_LOG_SESSION_KEY) === "1") {
-        return;
-      }
+  function logGameStart() {
 
-      // URL未設定でもゲーム本体は通常どおり動作。
-      if (!START_LOG_URL || START_LOG_URL.includes("PASTE_GOOGLE_APPS_SCRIPT")) {
-        console.warn("開始ログURLが未設定です。");
-        return;
-      }
+  if (sessionStorage.getItem(START_LOG_SESSION_KEY) === "1") {
+    return;
+  }
 
-      const now = new Date();
+  if (!START_LOG_URL || START_LOG_URL.includes("PASTE_GOOGLE")) {
+    console.warn("開始ログURLが未設定です");
+    return;
+  }
 
-      const payload = new URLSearchParams({
-        event: "game_start",
-        timestamp: now.toISOString(),
-        localTime: now.toLocaleTimeString("ja-JP", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit"
-        }),
-        userAgent: navigator.userAgent
-      });
+  const now = new Date();
 
-      fetch(START_LOG_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: payload.toString(),
-        keepalive: true
+  const url =
+    START_LOG_URL +
+    "?event=start" +
+    "&time=" +
+    encodeURIComponent(
+      now.toLocaleTimeString("ja-JP", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
       })
-      .then(() => {
-        sessionStorage.setItem(START_LOG_SESSION_KEY, "1");
-      })
-      .catch(error => {
-        console.warn("開始ログの送信に失敗しました:", error);
-      });
-    }
+    );
+
+  fetch(url, {
+    method: "GET",
+    mode: "no-cors"
+  });
+
+  sessionStorage.setItem(
+    START_LOG_SESSION_KEY,
+    "1"
+  );
+
+}
+  
+
 
     function loadProgress() {
       try {
